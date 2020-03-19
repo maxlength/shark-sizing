@@ -129,6 +129,20 @@ header {
   display: inline-block;
   width: 40%;
 }
+.usernamesAndSizes li > span:before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 12px;
+  margin-right: 15px;
+}
+.usernamesAndSizes li > span.connected:before {
+  background-color: green;
+}
+.usernamesAndSizes li > span.disconnected:before {
+  background-color: red;
+}
 .buttonsRow {
   display: flex;
   justify-content: right;

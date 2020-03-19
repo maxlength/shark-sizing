@@ -19,7 +19,7 @@ app.get("/", function(req, res) {
   res.sendFile(__dirname + "/login.html");
 });
 
-app.post("/room/:room", function(req, res) {
+app.post("/room/:room", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 
   username = req.body.username;
@@ -27,51 +27,51 @@ app.post("/room/:room", function(req, res) {
   admin = req.body.admin;
 });
 
-app.get("/room/:room", function(req, res) {
+app.get("/room/:room", (req, res) => {
   res.redirect("/?room=" + req.params.room);
 });
 
-io.on("connection", function(socket) {
+io.on("connection", socket => {
   connections.push(socket);
   socket.username = username;
   socket.admin = admin;
-  selectedSizes[socket.username] = "-";
+  selectedSizes[socket.username] = { status: "connected", estimate: "-" };
   updateUsernamesAndSizes();
   updateToggleClassName();
 
   io.emit("set username", username);
 
-  socket.on("disconnect", function() {
+  socket.on("disconnect", () => {
     connections.splice(connections.indexOf(socket), 1);
-    delete selectedSizes[socket.username];
+    selectedSizes[socket.username] = { status: "disconnected", estimate: "-" };
     updateUsernamesAndSizes();
   });
 
-  socket.on("size selected", function(size) {
-    selectedSizes[socket.username] = size;
+  socket.on("size selected", estimate => {
+    selectedSizes[socket.username].estimate = estimate;
     updateUsernamesAndSizes();
   });
 
-  socket.on("reset estimates", function() {
+  socket.on("reset estimates", () => {
     for (var username in selectedSizes) {
-      selectedSizes[username] = "-";
+      selectedSizes[username].estimate = "-";
     }
     updateUsernamesAndSizes();
     io.emit("estimates resetted");
   });
 
-  socket.on("toggle estimates", function(className) {
+  socket.on("toggle estimates", className => {
     toggledClassName =
       className === "hiddenEstimates" ? "shownEstimates" : "hiddenEstimates";
     updateToggleClassName();
   });
 
-  socket.on("get most voted estimates", function() {
+  socket.on("get most voted estimates", () => {
     let mostVotedEstimates = [];
 
     for (var username in selectedSizes) {
-      if (selectedSizes[username] !== "-") {
-        mostVotedEstimates.push(selectedSizes[username]);
+      if (selectedSizes[username].estimate !== "-") {
+        mostVotedEstimates.push(selectedSizes[username].estimate);
       }
     }
 
@@ -85,7 +85,7 @@ io.on("connection", function(socket) {
     io.emit("most voted estimates", mostFrequent);
   });
 
-  socket.on("remove user", function(username) {
+  socket.on("remove user", username => {
     delete selectedSizes[username];
     updateUsernamesAndSizes();
   });

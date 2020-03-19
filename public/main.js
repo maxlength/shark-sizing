@@ -56,8 +56,8 @@ $(function() {
     $usernamesAndSizes.find("[data-username]").remove();
     for (var username in selectedSizes) {
       $usernamesAndSizes.append(`<li data-username="${username}">
-                            <span class='username'>${username}</span>
-                            <span class='estimate'>${selectedSizes[username]}</span>
+                            <span class='username ${selectedSizes[username].status}'>${username}</span>
+                            <span class='estimate'>${selectedSizes[username].estimate}</span>
                             <span class='hiddenEstimate'>?</span>
                             <button>Remove</button>
                         </li>`);
