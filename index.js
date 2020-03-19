@@ -67,22 +67,17 @@ io.on("connection", socket => {
   });
 
   socket.on("get most voted estimates", () => {
-    let mostVotedEstimates = [];
+    let allEstimates = [];
 
     for (var username in selectedSizes) {
       if (selectedSizes[username].estimate !== "-") {
-        mostVotedEstimates.push(selectedSizes[username].estimate);
+        allEstimates.push(selectedSizes[username].estimate);
       }
     }
 
-    let counts = mostVotedEstimates.reduce((a, c) => {
-      a[c] = (a[c] || 0) + 1;
-      return a;
-    }, {});
-    let maxCount = Math.max(...Object.values(counts));
-    let mostFrequent = Object.keys(counts).filter(k => counts[k] === maxCount);
+    let mostUsedEstimates = _getArrayElementsWithMostOccurrences(allEstimates);
 
-    io.emit("most voted estimates", mostFrequent);
+    io.emit("most voted estimates", mostUsedEstimates);
   });
 
   socket.on("remove user", username => {
@@ -96,6 +91,15 @@ io.on("connection", socket => {
 
   function updateUsernamesAndSizes() {
     io.emit("sizes updated", selectedSizes);
+  }
+
+  function _getArrayElementsWithMostOccurrences(arr) {
+    let counts = arr.reduce((a, c) => {
+      a[c] = (a[c] || 0) + 1;
+      return a;
+    }, {});
+    let maxCount = Math.max(...Object.values(counts));
+    return Object.keys(counts).filter(k => counts[k] === maxCount);
   }
 });
 
