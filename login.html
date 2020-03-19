@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Shark Sizing | Login</title>
+    <style>
+      /**
+ * Mini Reset
+ *=============*/
+      html {
+        font-family: sans-serif;
+        font-size: 62.5%;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-size: 1.6rem;
+        font-family: Helvetica, Arial;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: inherit;
+      }
+
+      body,
+      ol,
+      ul,
+      li,
+      a,
+      button {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border: 0;
+      }
+
+      a {
+        color: green;
+        text-decoration: underline;
+      }
+
+      button {
+        -webkit-appearance: button;
+        background-color: transparent;
+        display: block;
+      }
+
+      /** ===============
+ * Mini reset end
+ */
+
+      #login {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 30px auto;
+      }
+
+      #login > div {
+        max-width: 320px;
+        margin: 30px;
+        padding: 30px;
+        border: 1px solid black;
+      }
+
+      #login label,
+      #login input {
+        display: block;
+      }
+
+      #login input {
+        margin-bottom: 10px;
+      }
+
+      #login button {
+        width: 100%;
+        margin: 10px 0;
+        padding: 10px 0;
+        text-align: center;
+        text-transform: uppercase;
+        background-color: black;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="login">
+      <div>
+        <p>
+          Create a scrum poker room now? Enter name and your poker room will be
+          created. Share the room ID with others to start planning and
+          estimating story points online and for free.
+        </p>
+        <form id="createRoomForm" action="/room" method="POST">
+          <label>Username</label>
+          <input id="usernameCreateRoom" name="username" type="text" />
+          <input type="hidden" name="admin" value="true" />
+          <button type="submit">Create Room</button>
+        </form>
+      </div>
+
+      <div>
+        <p>
+          Somebody already created a poker room? Enter your name and the room ID
+          and you can start your sprint planning: estimate the effort or story
+          points.
+        </p>
+        <form id="loginForm" action="/room" method="POST">
+          <label>Username</label>
+          <input id="username" name="username" type="text" />
+          <label>Room</label>
+          <input id="room" name="room" type="text" />
+          <button type="submit">Enter Room</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      $(function() {
+        const $createRoomForm = $("#createRoomForm");
+        const $loginForm = $("#loginForm");
+
+        $createRoomForm.find('[type="submit"]').on("click", e => {
+          e.preventDefault();
+
+          const $username = $("#usernameCreateRoom");
+          const username = $username.val();
+          const room = Math.floor(Math.random() * 1000000) + 1;
+
+          if (username && room) {
+            $createRoomForm.attr("action", `/room/${room}`);
+            $createRoomForm.submit();
+          }
+
+          return false;
+        });
+
+        $loginForm.find('[type="submit"]').on("click", e => {
+          e.preventDefault();
+
+          const $username = $("#username");
+          const username = $username.val();
+          const $room = $("#room");
+          const room = $room.val();
+
+          if (username && room) {
+            $loginForm.attr("action", `/room/${room}`);
+            $loginForm.submit();
+          }
+
+          return false;
+        });
+      });
+    </script>
+  </body>
+</html>
