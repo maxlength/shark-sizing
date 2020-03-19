@@ -6,7 +6,6 @@ const bodyParser = require("body-parser");
 
 const PORT = process.env.PORT || 3000;
 let connections = [];
-let users = [];
 let username = "";
 let room = "";
 let admin = false;
@@ -24,43 +23,28 @@ app.post("/room/:room", function(req, res) {
   res.sendFile(__dirname + "/index.html");
 
   username = req.body.username;
-  room = req.body.room;
+  room = req.params.room;
   admin = req.body.admin;
 });
 
 app.get("/room/:room", function(req, res) {
-  res.sendFile(__dirname + "/index.html");
-
-  username = req.body.username;
-  if (!username) {
-    console.log("redirect");
-    res.redirect("/");
-  }
-
-  room = req.body.room;
-  admin = req.body.admin;
+  res.redirect("/?room=" + req.params.room);
 });
 
 io.on("connection", function(socket) {
   connections.push(socket);
   socket.username = username;
   socket.admin = admin;
-  users.push(username);
   selectedSizes[socket.username] = "-";
   updateUsernamesAndSizes();
   updateToggleClassName();
 
   io.emit("set username", username);
 
-  console.log("user connected");
-
   socket.on("disconnect", function() {
     connections.splice(connections.indexOf(socket), 1);
-    users.splice(users.indexOf(socket.username), 1);
     delete selectedSizes[socket.username];
     updateUsernamesAndSizes();
-
-    console.log("user disconnected");
   });
 
   socket.on("size selected", function(size) {
@@ -73,7 +57,7 @@ io.on("connection", function(socket) {
       selectedSizes[username] = "-";
     }
     updateUsernamesAndSizes();
-    io.emit("estimates resetted", users);
+    io.emit("estimates resetted");
   });
 
   socket.on("toggle estimates", function(className) {
@@ -102,7 +86,6 @@ io.on("connection", function(socket) {
   });
 
   socket.on("remove user", function(username) {
-    users.splice(users.indexOf(username), 1);
     delete selectedSizes[username];
     updateUsernamesAndSizes();
   });

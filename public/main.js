@@ -24,7 +24,7 @@ $(function() {
     }
   });
 
-  socket.on("estimates resetted", function(selectedSizes) {
+  socket.on("estimates resetted", () => {
     $sizes.find(".size").removeClass("selected");
     $mostVotedPanel.html("");
   });
@@ -33,7 +33,7 @@ $(function() {
     socket.emit("toggle estimates", $("#sizingPanel").attr("class"));
   });
 
-  socket.on("estimates toggled", function(className) {
+  socket.on("estimates toggled", className => {
     $("#sizingPanel").attr("class", className);
   });
 
@@ -41,18 +41,18 @@ $(function() {
     socket.emit("get most voted estimates");
   });
 
-  socket.on("most voted estimates", function(mostVotedEstimates) {
+  socket.on("most voted estimates", mostVotedEstimates => {
     mostVotedEstimates.length &&
       $mostVotedPanel.html(
         `Most voted estimate(s): <span>${mostVotedEstimates.toString()}</span>`
       );
   });
 
-  socket.once("set username", function(username) {
+  socket.once("set username", username => {
     $username.text(username);
   });
 
-  socket.on("sizes updated", function(selectedSizes) {
+  socket.on("sizes updated", selectedSizes => {
     $usernamesAndSizes.find("[data-username]").remove();
     for (var username in selectedSizes) {
       $usernamesAndSizes.append(`<li data-username="${username}">
