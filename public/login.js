@@ -31,6 +31,8 @@ $(function() {
     const room = $room.val();
 
     if (username && room) {
+      //let socket = io();
+      //socket.emit("join", room);
       $loginForm.attr("action", `/room/${room}`);
       $loginForm.submit();
     }

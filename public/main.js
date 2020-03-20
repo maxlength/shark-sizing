@@ -1,5 +1,9 @@
 $(function() {
   let socket = io();
+  let href = window.location.href;
+  var room = href.substring(href.lastIndexOf("/") + 1);
+
+  socket.emit("join", room);
 
   let $username = $(".username");
   let $sizes = $(".sizes");
@@ -13,14 +17,17 @@ $(function() {
     let $button = $(e.target);
     $sizes.find(".size").removeClass("selected");
     $button.closest(".size").addClass("selected");
-    socket.emit("size selected", $button.data("size"));
+    socket.emit("estimate selected", {
+      room,
+      estimate: $button.data("size")
+    });
   });
 
   $deleteEstimates.on("click", e => {
     if (
       confirm("Are you sure you want to delete all estimates in this room?")
     ) {
-      socket.emit("reset estimates");
+      socket.emit("reset estimates", room);
     }
   });
 
@@ -30,7 +37,10 @@ $(function() {
   });
 
   $toggleEstimates.on("click", e => {
-    socket.emit("toggle estimates", $("#sizingPanel").attr("class"));
+    socket.emit("toggle estimates", {
+      room,
+      className: $("#sizingPanel").attr("class")
+    });
   });
 
   socket.on("estimates toggled", className => {
@@ -38,7 +48,7 @@ $(function() {
   });
 
   $mostVotedEstimates.on("click", e => {
-    socket.emit("get most voted estimates");
+    socket.emit("get most voted estimates", room);
   });
 
   socket.on("most voted estimates", mostVotedEstimates => {
@@ -69,6 +79,6 @@ $(function() {
       .closest("[data-username]")
       .data("username");
 
-    socket.emit("remove user", usernameToRemove);
+    socket.emit("remove user", { room, usernameToRemove });
   });
 });

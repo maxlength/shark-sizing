@@ -9,7 +9,7 @@ let connections = [];
 let username = "";
 let room = "";
 let admin = false;
-let selectedSizes = {};
+let users = {};
 let toggledClassName = "hiddenEstimates";
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -20,11 +20,11 @@ app.get("/", function(req, res) {
 });
 
 app.post("/room/:room", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
-
   username = req.body.username;
   room = req.params.room;
   admin = req.body.admin;
+
+  res.sendFile(__dirname + "/index.html");
 });
 
 app.get("/room/:room", (req, res) => {
@@ -35,73 +35,96 @@ io.on("connection", socket => {
   connections.push(socket);
   socket.username = username;
   socket.admin = admin;
-  selectedSizes[socket.username] = { status: "connected", estimate: "-" };
-  updateUsernamesAndSizes();
-  updateToggleClassName();
 
-  io.emit("set username", username);
+  console.log(`${username} connected`);
+
+  socket.on("join", room => {
+    socket.join(room);
+    socket.room = room;
+
+    io.to(room).emit("set username", username);
+
+    if (users[room] === undefined) {
+      users[room] = {};
+    }
+
+    users[room][socket.username] = {
+      status: "connected",
+      estimate: "-"
+    };
+
+    updateUsers(room);
+    toggleSelectedEstimatesVisibility(room);
+  });
 
   socket.on("disconnect", () => {
     connections.splice(connections.indexOf(socket), 1);
-    selectedSizes[socket.username] = { status: "disconnected", estimate: "-" };
-    updateUsernamesAndSizes();
+    users[socket.room][socket.username] = {
+      status: "disconnected",
+      estimate: "-"
+    };
+    updateUsers(socket.room);
+
+    console.log(`${socket.username} disconnected`);
   });
 
-  socket.on("size selected", estimate => {
-    selectedSizes[socket.username].estimate = estimate;
-    updateUsernamesAndSizes();
+  socket.on("estimate selected", ({ room, estimate }) => {
+    users[room][socket.username].estimate = estimate;
+    updateUsers(room);
   });
 
-  socket.on("reset estimates", () => {
-    for (var username in selectedSizes) {
-      selectedSizes[username].estimate = "-";
+  socket.on("reset estimates", room => {
+    for (var username in users[room]) {
+      users[room][username].estimate = "-";
     }
-    updateUsernamesAndSizes();
-    io.emit("estimates resetted");
+    updateUsers(room);
+    io.in(room).emit("estimates resetted");
   });
 
-  socket.on("toggle estimates", className => {
+  socket.on("toggle estimates", ({ room, className }) => {
     toggledClassName =
       className === "hiddenEstimates" ? "shownEstimates" : "hiddenEstimates";
-    updateToggleClassName();
+    toggleSelectedEstimatesVisibility(room);
   });
 
-  socket.on("get most voted estimates", () => {
+  socket.on("get most voted estimates", room => {
     let allEstimates = [];
 
-    for (var username in selectedSizes) {
-      if (selectedSizes[username].estimate !== "-") {
-        allEstimates.push(selectedSizes[username].estimate);
+    for (var username in users[room]) {
+      if (users[room][username].estimate !== "-") {
+        allEstimates.push(users[room][username].estimate);
       }
     }
 
     let mostUsedEstimates = _getArrayElementsWithMostOccurrences(allEstimates);
 
-    io.emit("most voted estimates", mostUsedEstimates);
+    io.in(room).emit("most voted estimates", mostUsedEstimates);
   });
 
-  socket.on("remove user", username => {
-    delete selectedSizes[username];
-    updateUsernamesAndSizes();
+  socket.on("remove user", ({ room, usernameToRemove }) => {
+    delete users[room][usernameToRemove];
+    updateUsers(room);
+
+    console.log(`${usernameToRemove} was removed`);
   });
-
-  function updateToggleClassName() {
-    io.emit("estimates toggled", toggledClassName);
-  }
-
-  function updateUsernamesAndSizes() {
-    io.emit("sizes updated", selectedSizes);
-  }
-
-  function _getArrayElementsWithMostOccurrences(arr) {
-    let counts = arr.reduce((a, c) => {
-      a[c] = (a[c] || 0) + 1;
-      return a;
-    }, {});
-    let maxCount = Math.max(...Object.values(counts));
-    return Object.keys(counts).filter(k => counts[k] === maxCount);
-  }
 });
+
+function toggleSelectedEstimatesVisibility(room) {
+  io.in(room).emit("estimates toggled", toggledClassName);
+}
+
+function updateUsers(room) {
+  io.in(room).emit("sizes updated", users[room]);
+}
+
+function _getArrayElementsWithMostOccurrences(arr) {
+  let counts = arr.reduce((a, c) => {
+    a[c] = (a[c] || 0) + 1;
+    return a;
+  }, {});
+  let maxCount = Math.max(...Object.values(counts));
+  return Object.keys(counts).filter(k => counts[k] === maxCount);
+}
 
 http.listen(PORT, function() {
   console.log("listening on *:" + PORT);
