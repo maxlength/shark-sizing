@@ -62,6 +62,10 @@ $(function() {
     $username.text(username);
   });
 
+  socket.once("set admin", admin => {
+    $("body").addClass(admin);
+  });
+
   socket.on("sizes updated", selectedSizes => {
     $usernamesAndSizes.find("[data-username]").remove();
     for (var username in selectedSizes) {

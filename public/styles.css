@@ -119,11 +119,15 @@ header {
   border-top: none;
 }
 .usernamesAndSizes button {
+  display: none;
   position: absolute;
   top: 8px;
   right: 10px;
   background-color: lightgrey;
   padding: 3px 5px;
+}
+.admin .usernamesAndSizes button {
+  display: block;
 }
 .usernamesAndSizes li > span {
   display: inline-block;
@@ -154,6 +158,14 @@ header {
   color: white;
   margin: 10px 0;
   margin-left: 20px;
+}
+.toggleEstimates,
+.deleteEstimates {
+  display: none;
+}
+.admin .toggleEstimates,
+.admin .deleteEstimates {
+  display: block;
 }
 .hiddenEstimates .hideEstimates {
   display: none;

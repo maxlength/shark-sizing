@@ -53,6 +53,10 @@ io.on("connection", socket => {
       estimate: "-"
     };
 
+    if (socket.admin) {
+      io.to(room).emit("set admin", "admin");
+    }
+
     updateUsers(room);
     toggleSelectedEstimatesVisibility(room);
   });
