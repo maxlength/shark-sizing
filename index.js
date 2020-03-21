@@ -42,10 +42,16 @@ io.on("connection", socket => {
     socket.join(room);
     socket.room = room;
 
-    io.to(room).emit("set username", username);
-
     if (users[room] === undefined) {
       users[room] = {};
+    }
+
+    if (users[room][socket.username] !== undefined) {
+      var newUsername = `${socket.username}${Math.floor(
+        Math.random() * 1000000
+      ) + 1}`;
+      socket.username = newUsername;
+      username = newUsername;
     }
 
     users[room][socket.username] = {
@@ -53,6 +59,8 @@ io.on("connection", socket => {
       estimate: "-",
       hasVoted: false
     };
+
+    io.to(room).emit("set username", username);
 
     if (socket.admin) {
       io.to(room).emit("set admin", "admin");
