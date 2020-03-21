@@ -50,7 +50,8 @@ io.on("connection", socket => {
 
     users[room][socket.username] = {
       status: "connected",
-      estimate: "-"
+      estimate: "-",
+      hasVoted: false
     };
 
     if (socket.admin) {
@@ -63,23 +64,33 @@ io.on("connection", socket => {
 
   socket.on("disconnect", () => {
     connections.splice(connections.indexOf(socket), 1);
-    users[socket.room][socket.username] = {
-      status: "disconnected",
-      estimate: "-"
-    };
+    if (users[socket.room]) {
+      users[socket.room][socket.username] = {
+        status: "disconnected",
+        estimate: "-",
+        hasVoted: false
+      };
+    }
+
     updateUsers(socket.room);
 
     console.log(`${socket.username} disconnected`);
   });
 
+  socket.on("update story name", ({ room, story }) => {
+    io.in(room).emit("story updated", story);
+  });
+
   socket.on("estimate selected", ({ room, estimate }) => {
     users[room][socket.username].estimate = estimate;
+    users[room][socket.username].hasVoted = true;
     updateUsers(room);
   });
 
   socket.on("reset estimates", room => {
     for (var username in users[room]) {
       users[room][username].estimate = "-";
+      users[room][username].hasVoted = false;
     }
     updateUsers(room);
     io.in(room).emit("estimates resetted");
@@ -118,7 +129,7 @@ function toggleSelectedEstimatesVisibility(room) {
 }
 
 function updateUsers(room) {
-  io.in(room).emit("sizes updated", users[room]);
+  io.in(room).emit("users updated", users[room]);
 }
 
 function _getArrayElementsWithMostOccurrences(arr) {

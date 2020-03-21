@@ -6,12 +6,29 @@ $(function() {
   socket.emit("join", room);
 
   let $username = $(".username");
+  let $storyToEstimate = $(".storyToEstimate");
+  let $story = $storyToEstimate.find('[name="story"]');
+  let $storyDeleteButton = $storyToEstimate.find("button");
+  let $storyPlaceholder = $storyToEstimate.find("h2");
   let $sizes = $(".sizes");
   let $usernamesAndSizes = $(".usernamesAndSizes");
   let $deleteEstimates = $(".deleteEstimates");
   let $toggleEstimates = $(".toggleEstimates");
   let $mostVotedEstimates = $(".mostVotedEstimates");
   let $mostVotedPanel = $(".mostVotedPanel");
+
+  $story.on("keyup", e => {
+    console.log(e.target.value);
+    socket.emit("update story name", { room, story: e.target.value });
+  });
+
+  $storyDeleteButton.on("click", () => {
+    $story.val("").trigger("keyup");
+  });
+
+  socket.on("story updated", story => {
+    $storyPlaceholder.text(story);
+  });
 
   $sizes.on("click", "button", e => {
     let $button = $(e.target);
@@ -66,12 +83,14 @@ $(function() {
     $("body").addClass(admin);
   });
 
-  socket.on("sizes updated", selectedSizes => {
+  socket.on("users updated", users => {
     $usernamesAndSizes.find("[data-username]").remove();
-    for (var username in selectedSizes) {
-      $usernamesAndSizes.append(`<li data-username="${username}">
-                            <span class='username ${selectedSizes[username].status}'>${username}</span>
-                            <span class='estimate'>${selectedSizes[username].estimate}</span>
+    for (var username in users) {
+      let user = users[username];
+      let hasVotedClass = user.hasVoted ? "hasVoted" : "";
+      $usernamesAndSizes.append(`<li data-username="${username}" class="${hasVotedClass}">
+                            <span class='username ${user.status}'>${username}</span>
+                            <span class='estimate'>${user.estimate}</span>
                             <span class='hiddenEstimate'>?</span>
                             <button>Remove</button>
                         </li>`);

@@ -66,6 +66,31 @@ header {
 #sizingPanel {
   margin: 10px;
 }
+.storyToEstimate {
+  text-align: center;
+  margin-top: 50px;
+}
+.storyToEstimate input,
+.storyToEstimate button {
+  display: none;
+}
+.admin .storyToEstimate input {
+  display: inline-block;
+  margin: 0 auto;
+  min-width: 300px;
+}
+.admin .storyToEstimate button {
+  display: inline-block;
+  background-color: black;
+  color: white;
+  padding: 2px 5px;
+}
+.storyToEstimate h2 {
+  height: 30px;
+}
+.admin .storyToEstimate h2 {
+  display: none;
+}
 .sizes {
   display: flex;
   justify-content: center;
@@ -110,6 +135,9 @@ header {
   position: relative;
   padding: 10px 20px;
   border-top: 1px solid;
+}
+.usernamesAndSizes li.hasVoted {
+  background-color: lightgreen;
 }
 .usernamesAndSizes li:last-child {
   border-bottom: 1px solid;
