@@ -16,6 +16,16 @@ $(function() {
   let $toggleEstimates = $(".toggleEstimates");
   let $mostVotedEstimates = $(".mostVotedEstimates");
   let $mostVotedPanel = $(".mostVotedPanel");
+  let $link = $("header > button");
+  let $copiedLink = $(".copiedLink");
+
+  $link.on("click", () => {
+    copyToClipboard();
+    $copiedLink.show();
+    setTimeout(() => {
+      $copiedLink.hide();
+    }, 1000);
+  });
 
   $story.on("keyup", e => {
     console.log(e.target.value);
@@ -104,4 +114,14 @@ $(function() {
 
     socket.emit("remove user", { room, usernameToRemove });
   });
+
+  function copyToClipboard() {
+    const tempTextarea = document.createElement("textarea");
+    tempTextarea.value = href;
+    document.body.appendChild(tempTextarea);
+    tempTextarea.select();
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();
+    document.body.removeChild(tempTextarea);
+  }
 });

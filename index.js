@@ -24,6 +24,10 @@ app.post("/room/:room", (req, res) => {
   room = req.params.room;
   admin = req.body.admin;
 
+  if (!admin && users[room] === undefined) {
+    res.redirect("/?room=" + room + "&username=" + username + "&error=noroom");
+  }
+
   res.sendFile(__dirname + "/index.html");
 });
 
@@ -35,7 +39,7 @@ io.on("connection", socket => {
   connections.push(socket);
   socket.username = username;
   socket.admin = admin;
-
+  console.log(socket.id);
   console.log(`${username} connected`);
 
   socket.on("join", room => {

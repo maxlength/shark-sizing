@@ -63,6 +63,21 @@ header {
   text-align: right;
   z-index: 1;
 }
+header button {
+  display: inline;
+  margin-left: 20px;
+}
+.copiedLink {
+  display: none;
+  position: fixed;
+  width: 320px;
+  text-align: center;
+  top: 10px;
+  left: calc(50% - 160px);
+  background: green;
+  color: white;
+  padding: 20px;
+}
 #sizingPanel {
   margin: 10px;
 }
