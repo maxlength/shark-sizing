@@ -1,8 +1,5 @@
-$(function() {
-  var url = new URL(window.location.href);
-  var roomFromQuery = url.searchParams.get("room");
-  var usernameFromQuery = url.searchParams.get("username");
-  var error = url.searchParams.get("error");
+$(() => {
+  const roomFromQuery = new URL(window.location.href).searchParams.get("room");
 
   const $username = $("#username");
   const $room = $("#room");
@@ -11,41 +8,57 @@ $(function() {
     $room.val(roomFromQuery);
   }
 
-  if (usernameFromQuery) {
-    $username.val(usernameFromQuery);
-  }
-
-  if (error) {
-    $room.after(
-      `<span class="error">Sorry ${usernameFromQuery}, the room ${roomFromQuery} doesn't exist :(</span>`
-    );
-  }
-
   const $createRoomForm = $("#createRoomForm");
-  const $loginForm = $("#loginForm");
 
-  $createRoomForm.find('[type="submit"]').on("click", e => {
+  $createRoomForm.find("[type='submit']").on("click", e => {
     e.preventDefault();
 
-    const $userAdmin = $("#usernameCreateRoom");
     const newRoom = Math.floor(Math.random() * 1000000) + 1;
 
-    if ($userAdmin.val() && newRoom) {
+    if ($("#usernameCreateRoom").val() && newRoom) {
       $createRoomForm.attr("action", `/room/${newRoom}`).submit();
     }
 
     return false;
   });
 
-  $loginForm.find('[type="submit"]').on("click", e => {
+  const $loginForm = $("#loginForm");
+
+  $loginForm.find("[type='submit']").on("click", e => {
     e.preventDefault();
 
+    const username = $username.val();
     const room = $room.val();
 
-    if ($username.val() && room) {
-      $loginForm.attr("action", `/room/${room}`).submit();
-    }
+    if (username && room) {
+      $(".error").remove();
 
+      $.ajax("/getUsernameAndRoomAvailability", {
+        data: {
+          username,
+          room,
+          admin: false
+        }
+      })
+        .success(res => {
+          $loginForm.attr("action", `/room/${room}`).submit();
+        })
+        .error(res => {
+          if (res.status === 401) {
+            const error = res.responseText;
+            if (error === "noroom") {
+              $room.after(
+                `<span class="error">Sorry the room doesn't exist :(</span>`
+              );
+            }
+            if (error === "usernameunavailable") {
+              $username.after(
+                `<span class="error">Sorry, the name is already used :(</span>`
+              );
+            }
+          }
+        });
+    }
     return false;
   });
 });

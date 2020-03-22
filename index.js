@@ -10,13 +10,37 @@ let username = "";
 let room = "";
 let admin = false;
 let users = {};
+let rooms = []; // poi va riempito
 let toggledClassName = "hiddenEstimates";
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
 
-app.get("/", function(req, res) {
+app.get("/", (req, res) => {
   res.sendFile(__dirname + "/login.html");
+});
+
+app.get("/getUsernameAndRoomAvailability", (req, res) => {
+  username = req.query.username;
+  room = req.query.room;
+  admin = req.query.admin; // vedere come renderlo un booleano
+
+  let msg = "ok",
+    status = 200;
+
+  if (admin == "false" && users[room] === undefined) {
+    msg = "noroom";
+    status = 401;
+  } else if (users[room] !== undefined && users[room][username] !== undefined) {
+    msg = "usernameunavailable";
+    status = 401;
+  }
+
+  res.status(status).send(msg);
+});
+
+app.get("/room/:room", (req, res) => {
+  res.redirect("/?room=" + req.params.room);
 });
 
 app.post("/room/:room", (req, res) => {
@@ -24,23 +48,15 @@ app.post("/room/:room", (req, res) => {
   room = req.params.room;
   admin = req.body.admin;
 
-  if (!admin && users[room] === undefined) {
-    res.redirect("/?room=" + room + "&username=" + username + "&error=noroom");
-  }
-
   res.sendFile(__dirname + "/index.html");
-});
-
-app.get("/room/:room", (req, res) => {
-  res.redirect("/?room=" + req.params.room);
 });
 
 io.on("connection", socket => {
   connections.push(socket);
   socket.username = username;
   socket.admin = admin;
-  console.log(socket.id);
-  console.log(`${username} connected`);
+
+  console.log(`An user connected`);
 
   socket.on("join", room => {
     socket.join(room);
@@ -48,14 +64,6 @@ io.on("connection", socket => {
 
     if (users[room] === undefined) {
       users[room] = {};
-    }
-
-    if (users[room][socket.username] !== undefined) {
-      var newUsername = `${socket.username}${Math.floor(
-        Math.random() * 1000000
-      ) + 1}`;
-      socket.username = newUsername;
-      username = newUsername;
     }
 
     users[room][socket.username] = {
@@ -86,7 +94,7 @@ io.on("connection", socket => {
 
     updateUsers(socket.room);
 
-    console.log(`${socket.username} disconnected`);
+    console.log(`An user disconnected`);
   });
 
   socket.on("update story name", ({ room, story }) => {
