@@ -36,8 +36,7 @@ $(() => {
       $.ajax("/getUsernameAndRoomAvailability", {
         data: {
           username,
-          room,
-          admin: false
+          room
         }
       })
         .success(res => {

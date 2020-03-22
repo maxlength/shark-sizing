@@ -1,38 +1,51 @@
-$(function() {
-  let socket = io();
-  let href = window.location.href;
-  var room = href.substring(href.lastIndexOf("/") + 1);
+$(() => {
+  const socket = io();
+  const href = window.location.href;
+  const room = href.substring(href.lastIndexOf("/") + 1);
 
   socket.emit("join", room);
 
   let $username = $(".username");
   let $storyToEstimate = $(".storyToEstimate");
   let $story = $storyToEstimate.find('[name="story"]');
-  let $storyDeleteButton = $storyToEstimate.find("button");
+  let $resetStoryButton = $storyToEstimate.find("button");
   let $storyPlaceholder = $storyToEstimate.find("h2");
-  let $sizes = $(".sizes");
-  let $usernamesAndSizes = $(".usernamesAndSizes");
-  let $deleteEstimates = $(".deleteEstimates");
-  let $toggleEstimates = $(".toggleEstimates");
-  let $mostVotedEstimates = $(".mostVotedEstimates");
+  let $estimatesList = $(".sizes");
+  let $usersList = $(".usernamesAndSizes");
+  let $resetEstimatesButton = $(".deleteEstimates");
+  let $toggleEstimatesButton = $(".toggleEstimates");
+  let $mostVotedEstimatesButton = $(".mostVotedEstimates");
   let $mostVotedPanel = $(".mostVotedPanel");
   let $link = $("header > button");
   let $copiedLink = $(".copiedLink");
 
+  // Set username in header
+
+  socket.once("set username", username => {
+    $username.text(username);
+  });
+
+  // Set admin class for privileges
+
+  socket.once("set admin", admin => {
+    $("body").addClass(admin);
+  });
+
   $link.on("click", () => {
-    copyToClipboard();
+    _copyToClipboard();
     $copiedLink.show();
     setTimeout(() => {
       $copiedLink.hide();
     }, 1000);
   });
 
+  // Enter or update User story name
+
   $story.on("keyup", e => {
-    console.log(e.target.value);
     socket.emit("update story name", { room, story: e.target.value });
   });
 
-  $storyDeleteButton.on("click", () => {
+  $resetStoryButton.on("click", () => {
     $story.val("").trigger("keyup");
   });
 
@@ -40,17 +53,21 @@ $(function() {
     $storyPlaceholder.text(story);
   });
 
-  $sizes.on("click", "button", e => {
-    let $button = $(e.target);
-    $sizes.find(".size").removeClass("selected");
-    $button.closest(".size").addClass("selected");
+  // Choose an estimate
+
+  $estimatesList.on("click", "button", e => {
+    let $estimateButton = $(e.target);
+    $estimatesList.find(".size").removeClass("selected");
+    $estimateButton.closest(".size").addClass("selected");
     socket.emit("estimate selected", {
       room,
-      estimate: $button.data("size")
+      estimate: $estimateButton.data("size")
     });
   });
 
-  $deleteEstimates.on("click", e => {
+  // Reset all estimates
+
+  $resetEstimatesButton.on("click", e => {
     if (
       confirm("Are you sure you want to delete all estimates in this room?")
     ) {
@@ -59,11 +76,13 @@ $(function() {
   });
 
   socket.on("estimates resetted", () => {
-    $sizes.find(".size").removeClass("selected");
+    $estimatesList.find(".size").removeClass("selected");
     $mostVotedPanel.html("");
   });
 
-  $toggleEstimates.on("click", e => {
+  // Show or hide all estimates
+
+  $toggleEstimatesButton.on("click", e => {
     socket.emit("toggle estimates", {
       room,
       className: $("#sizingPanel").attr("class")
@@ -74,7 +93,9 @@ $(function() {
     $("#sizingPanel").attr("class", className);
   });
 
-  $mostVotedEstimates.on("click", e => {
+  // Show the most voted estimate(s)
+
+  $mostVotedEstimatesButton.on("click", e => {
     socket.emit("get most voted estimates", room);
   });
 
@@ -85,20 +106,14 @@ $(function() {
       );
   });
 
-  socket.once("set username", username => {
-    $username.text(username);
-  });
+  // Update list of the users, the estimates, the status of the users
 
-  socket.once("set admin", admin => {
-    $("body").addClass(admin);
-  });
-
-  socket.on("users updated", users => {
-    $usernamesAndSizes.find("[data-username]").remove();
-    for (var username in users) {
-      let user = users[username];
+  socket.on("users updated", room => {
+    $usersList.find("[data-username]").remove();
+    for (let username in room) {
+      let user = room[username];
       let hasVotedClass = user.hasVoted ? "hasVoted" : "";
-      $usernamesAndSizes.append(`<li data-username="${username}" class="${hasVotedClass}">
+      $usersList.append(`<li data-username="${username}" class="${hasVotedClass}">
                             <span class='username ${user.status}'>${username}</span>
                             <span class='estimate'>${user.estimate}</span>
                             <span class='hiddenEstimate'>?</span>
@@ -107,15 +122,17 @@ $(function() {
     }
   });
 
-  $usernamesAndSizes.on("click", "button", e => {
-    var usernameToRemove = $(e.target)
+  // Remove an user
+
+  $usersList.on("click", "button", e => {
+    const usernameToRemove = $(e.target)
       .closest("[data-username]")
       .data("username");
 
     socket.emit("remove user", { room, usernameToRemove });
   });
 
-  function copyToClipboard() {
+  const _copyToClipboard = () => {
     const tempTextarea = document.createElement("textarea");
     tempTextarea.value = href;
     document.body.appendChild(tempTextarea);
@@ -123,5 +140,5 @@ $(function() {
     document.execCommand("copy");
     window.getSelection().removeAllRanges();
     document.body.removeChild(tempTextarea);
-  }
+  };
 });
