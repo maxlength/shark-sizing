@@ -31,7 +31,7 @@ button {
 }
 
 a {
-  color: green;
+  color: darkorange;
   text-decoration: underline;
 }
 
@@ -52,20 +52,41 @@ button {
   min-width: 100px;
 }
 header {
-  background-color: lightgrey;
+  background-color: #263238;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 30px;
-  padding: 0 20px;
-  color: black;
-  text-align: right;
+  height: 40px;
+  line-height: 40px;
+  padding: 0 24px;
+  color: white;
   z-index: 1;
+}
+header .logo {
+  display: inline-block;
+  width: 74px;
+  height: 30px;
+  background: url(/shark_logo.svg) no-repeat center;
+  margin: 0 auto;
+}
+header .title {
+  position: absolute;
+  top: 3px;
+  line-height: 1;
+}
+header .title span {
+  position: relative;
+  top: -4px;
+  font-size: 12px;
 }
 header button {
   display: inline;
   margin-left: 20px;
+}
+header .welcome {
+  position: absolute;
+  right: 25px;
 }
 .copiedLink {
   display: none;
@@ -101,6 +122,8 @@ header button {
   padding: 2px 5px;
 }
 .storyToEstimate h2 {
+  font-family: "Lobster", cursive;
+  font-size: 30px;
   height: 30px;
 }
 .admin .storyToEstimate h2 {
@@ -123,6 +146,7 @@ header button {
   height: 120px;
 }
 .sizes .size p {
+  font-family: "Lobster", cursive;
   font-size: 50px;
   font-weight: bold;
   margin: 0;
@@ -137,8 +161,8 @@ header button {
   opacity: 0;
 }
 .sizes .size.selected {
-  border-color: green;
-  background-color: green;
+  border-color: darkorange;
+  background-color: darkorange;
 }
 .sizes .size.selected p {
   color: white;
@@ -150,9 +174,10 @@ header button {
   position: relative;
   padding: 10px 20px;
   border-top: 1px solid;
+  background-color: #fffaf3;
 }
 .usernamesAndSizes li.hasVoted {
-  background-color: lightgreen;
+  background-color: #378cc8;
 }
 .usernamesAndSizes li:last-child {
   border-bottom: 1px solid;

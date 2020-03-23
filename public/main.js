@@ -16,7 +16,7 @@ $(() => {
   let $toggleEstimatesButton = $(".toggleEstimates");
   let $mostVotedEstimatesButton = $(".mostVotedEstimates");
   let $mostVotedPanel = $(".mostVotedPanel");
-  let $link = $("header > button");
+  let $link = $("header .welcome button");
   let $copiedLink = $(".copiedLink");
 
   // Set username in header

@@ -90,7 +90,7 @@ io.on("connection", socket => {
       };
     }
 
-    _updateUsers(room);
+    _updateUsers(roomServer);
 
     console.log(`An user disconnected`);
   });
