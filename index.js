@@ -9,7 +9,7 @@ let connections = [];
 let usernameServer = "";
 let roomServer = "";
 let adminServer = false;
-let rooms = {};
+let rooms = [];
 let toggledClassName = "hiddenEstimates";
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -20,19 +20,14 @@ app.get("/", (req, res) => {
 });
 
 app.get("/getUsernameAndRoomAvailability", (req, res) => {
-  usernameFromQuery = req.query.username;
-  roomFromQuery = req.query.room;
-
   let msg = "ok",
     status = 200;
+  let room = _getRoomById(req.query.room);
 
-  if (rooms[roomFromQuery] === undefined) {
+  if (_noRoomToJoin(room)) {
     msg = "noroom";
     status = 401;
-  } else if (
-    rooms[roomFromQuery] !== undefined &&
-    rooms[roomFromQuery][usernameFromQuery] !== undefined
-  ) {
+  } else if (_isUsernameAlreadyUsed(room["users"], req.query.username)) {
     msg = "usernameunavailable";
     status = 401;
   }
@@ -59,38 +54,45 @@ io.on("connection", socket => {
 
   socket.on("join", room => {
     socket.join(room);
-
-    if (rooms[room] === undefined) {
-      rooms[room] = {};
-    }
-
-    rooms[room][usernameServer] = {
-      status: "connected",
-      estimate: "-",
-      hasVoted: false
+    socket.room = roomServer;
+    socket.user = {
+      username: usernameServer,
+      isAdmin: adminServer
     };
 
-    io.to(room).emit("set username", usernameServer);
+    let requestedRoom = _getRoomById(room);
 
-    if (adminServer) {
+    if (requestedRoom === undefined) {
+      _createRoom(room, rooms);
+    }
+
+    _createUser(room, socket.user.username);
+
+    io.to(room).emit("set username", socket.user.username);
+
+    if (socket.user.isAdmin) {
       io.to(room).emit("set admin", "admin");
     }
 
-    _updateUsers(room);
+    _emitUpdatedUsers(room);
     _toggleSelectedEstimatesVisibility(room);
   });
 
   socket.on("disconnect", () => {
     connections.splice(connections.indexOf(socket), 1);
-    if (rooms[roomServer]) {
-      rooms[roomServer][usernameServer] = {
-        status: "disconnected",
-        estimate: "-",
-        hasVoted: false
-      };
+    let room = _getRoomById(socket.room);
+    if (room) {
+      let user = _getUserByUsername(room["users"], socket.user.username);
+      if (user) {
+        user = {
+          status: "disconnected",
+          estimate: "-",
+          hasVoted: false
+        };
+      }
     }
 
-    _updateUsers(roomServer);
+    _emitUpdatedUsers(socket.room);
 
     console.log(`An user disconnected`);
   });
@@ -99,18 +101,25 @@ io.on("connection", socket => {
     io.in(room).emit("story updated", story);
   });
 
-  socket.on("estimate selected", ({ room, estimate }) => {
-    rooms[room][usernameServer].estimate = estimate;
-    rooms[room][usernameServer].hasVoted = true;
-    _updateUsers(room);
+  socket.on("estimate selected", ({ room, username, estimate }) => {
+    let users = _getUsersByRoom(room);
+    let user = _getUserByUsername(users, username);
+
+    user.estimate = estimate;
+    user.hasVoted = true;
+
+    _emitUpdatedUsers(room);
   });
 
   socket.on("reset estimates", room => {
-    for (let username in rooms[room]) {
-      rooms[room][username].estimate = "-";
-      rooms[room][username].hasVoted = false;
+    let users = _getUsersByRoom(room);
+    for (let user of users) {
+      user.estimate = "-";
+      user.hasVoted = false;
     }
-    _updateUsers(room);
+
+    _emitUpdatedUsers(room);
+
     io.in(room).emit("estimates resetted");
   });
 
@@ -122,10 +131,11 @@ io.on("connection", socket => {
 
   socket.on("get most voted estimates", room => {
     let allEstimates = [];
+    let users = _getRoomById(room)["users"];
 
-    for (let username in rooms[room]) {
-      if (rooms[room][username].estimate !== "-") {
-        allEstimates.push(rooms[room][username].estimate);
+    for (let user of users) {
+      if (user.estimate !== "-") {
+        allEstimates.push(user.estimate);
       }
     }
 
@@ -135,8 +145,11 @@ io.on("connection", socket => {
   });
 
   socket.on("remove user", ({ room, usernameToRemove }) => {
-    delete rooms[room][usernameToRemove];
-    _updateUsers(room);
+    let users = _getUsersByRoom(room);
+    let user = _getUserByUsername(users, usernameToRemove);
+    users.splice(users.indexOf(user), 1);
+
+    _emitUpdatedUsers(room);
 
     console.log(`${usernameToRemove} was removed`);
   });
@@ -146,8 +159,8 @@ const _toggleSelectedEstimatesVisibility = room => {
   io.in(room).emit("estimates toggled", toggledClassName);
 };
 
-const _updateUsers = room => {
-  io.in(room).emit("users updated", rooms[room]);
+const _emitUpdatedUsers = room => {
+  io.in(room).emit("users updated", _getRoomById(room)["users"]);
 };
 
 const _getArrayElementsWithMostOccurrences = arr => {
@@ -157,6 +170,46 @@ const _getArrayElementsWithMostOccurrences = arr => {
   }, {});
   let maxCount = Math.max(...Object.values(counts));
   return Object.keys(counts).filter(k => counts[k] === maxCount);
+};
+
+const _getRoomById = id => {
+  return rooms.filter(r => r.id == id)[0];
+};
+
+const _getUsersByRoom = id => {
+  return _getRoomById(id)["users"];
+};
+
+const _getUserByUsername = (users, username) => {
+  return users.filter(u => u.username == username)[0];
+};
+
+const _noRoomToJoin = room => {
+  return room === undefined;
+};
+
+const _isUsernameAlreadyUsed = (users, username) => {
+  return _getUserByUsername(users, username) !== undefined;
+};
+
+const _createRoom = (id, rooms) => {
+  rooms.push({ id: id, users: [] });
+};
+
+const _createUser = (room, username) => {
+  let users = _getUsersByRoom(room);
+  let user = _getUserByUsername(users, username);
+
+  if (!user) {
+    let newUser = {
+      username: username,
+      status: "connected",
+      estimate: "-",
+      hasVoted: false
+    };
+
+    users.push(newUser);
+  }
 };
 
 http.listen(PORT, () => {

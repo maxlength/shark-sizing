@@ -6,6 +6,7 @@ $(() => {
   socket.emit("join", room);
 
   let $username = $(".username");
+  let username = "";
   let $storyToEstimate = $(".storyToEstimate");
   let $story = $storyToEstimate.find('[name="story"]');
   let $resetStoryButton = $storyToEstimate.find("button");
@@ -21,7 +22,8 @@ $(() => {
 
   // Set username in header
 
-  socket.once("set username", username => {
+  socket.once("set username", usernameSet => {
+    username = usernameSet;
     $username.text(username);
   });
 
@@ -61,6 +63,7 @@ $(() => {
     $estimateButton.closest(".size").addClass("selected");
     socket.emit("estimate selected", {
       room,
+      username,
       estimate: $estimateButton.data("size")
     });
   });
@@ -108,13 +111,12 @@ $(() => {
 
   // Update list of the users, the estimates, the status of the users
 
-  socket.on("users updated", room => {
+  socket.on("users updated", users => {
     $usersList.find("[data-username]").remove();
-    for (let username in room) {
-      let user = room[username];
+    for (let user of users) {
       let hasVotedClass = user.hasVoted ? "hasVoted" : "";
-      $usersList.append(`<li data-username="${username}" class="${hasVotedClass}">
-                            <span class='username ${user.status}'>${username}</span>
+      $usersList.append(`<li data-username="${user.username}" class="${hasVotedClass}">
+                            <span class='username ${user.status}'>${user.username}</span>
                             <span class='estimate'>${user.estimate}</span>
                             <span class='hiddenEstimate'>?</span>
                             <button>Remove</button>
