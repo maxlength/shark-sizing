@@ -144,6 +144,10 @@ io.on("connection", socket => {
     io.in(room).emit("most voted estimates", mostUsedEstimates);
   });
 
+  socket.on("close most voted estimates", room => {
+    io.in(room).emit("most voted estimates closed");
+  });
+
   socket.on("remove user", ({ room, usernameToRemove }) => {
     let users = _getUsersByRoom(room);
     let user = _getUserByUsername(users, usernameToRemove);
@@ -160,7 +164,8 @@ const _toggleSelectedEstimatesVisibility = room => {
 };
 
 const _emitUpdatedUsers = room => {
-  io.in(room).emit("users updated", _getRoomById(room)["users"]);
+  let roomById = _getRoomById(room);
+  roomById && io.in(room).emit("users updated", roomById["users"]);
 };
 
 const _getArrayElementsWithMostOccurrences = arr => {

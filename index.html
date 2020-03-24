@@ -6,6 +6,10 @@
       href="https://fonts.googleapis.com/css?family=Lobster&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" type="text/css" href="/styles.css" />
   </head>
   <body>
@@ -23,64 +27,72 @@
       </div>
     </header>
     <div id="sizingPanel" class="hiddenEstimates">
-      <div class="storyToEstimate">
-        <p>What we are estimating</p>
-        <input type="text" name="story" />
-        <button>Delete</button>
-        <h2></h2>
+      <div class="top">
+        <div class="storyToEstimate">
+          <p>What we are estimating</p>
+          <input type="text" name="story" />
+          <button>Delete</button>
+          <h2></h2>
+        </div>
+        <ul class="sizes">
+          <li class="size">
+            <p>1</p>
+            <button class="btn" data-size="1">Submit</button>
+          </li>
+          <li class="size">
+            <p>2</p>
+            <button data-size="2">Submit</button>
+          </li>
+          <li class="size">
+            <p>3</p>
+            <button data-size="3">Submit</button>
+          </li>
+          <li class="size">
+            <p>5</p>
+            <button data-size="5">Submit</button>
+          </li>
+          <li class="size">
+            <p>8</p>
+            <button data-size="8">Submit</button>
+          </li>
+          <li class="size">
+            <p>13</p>
+            <button data-size="13">Submit</button>
+          </li>
+          <li class="size">
+            <p>?</p>
+            <button data-size="-">Submit</button>
+          </li>
+        </ul>
+
+        <div class="mostVotedPanel">
+          <img src="/shark_loader.gif" />
+          <span class="text"></span>
+          <button>CLOSE</button>
+        </div>
+
+        <div class="buttonsRow">
+          <button class="mostVotedEstimates btn">
+            <span>Most voted</span>
+          </button>
+          <button class="toggleEstimates btn">
+            <span class="showEstimates">Show</span
+            ><span class="hideEstimates">Hide</span>
+          </button>
+          <button class="deleteEstimates btn">
+            <span>Delete</span>
+          </button>
+        </div>
       </div>
-      <ul class="sizes">
-        <li class="size">
-          <p>1</p>
-          <button class="btn" data-size="1">Submit</button>
-        </li>
-        <li class="size">
-          <p>2</p>
-          <button data-size="2">Submit</button>
-        </li>
-        <li class="size">
-          <p>3</p>
-          <button data-size="3">Submit</button>
-        </li>
-        <li class="size">
-          <p>5</p>
-          <button data-size="5">Submit</button>
-        </li>
-        <li class="size">
-          <p>8</p>
-          <button data-size="8">Submit</button>
-        </li>
-        <li class="size">
-          <p>13</p>
-          <button data-size="13">Submit</button>
-        </li>
-        <li class="size">
-          <p>?</p>
-          <button data-size="-">Submit</button>
-        </li>
-      </ul>
 
-      <div class="mostVotedPanel"></div>
-
-      <div class="buttonsRow">
-        <button class="mostVotedEstimates btn">
-          <span>Most voted</span>
-        </button>
-        <button class="toggleEstimates btn">
-          <span class="showEstimates">Show</span
-          ><span class="hideEstimates">Hide</span>
-        </button>
-        <button class="deleteEstimates btn">
-          <span>Delete</span>
-        </button>
+      <div class="bottom">
+        <ul class="usernamesAndSizes">
+          <li class="header">
+            <span>Name</span>
+            <span>Estimate</span>
+          </li>
+        </ul>
       </div>
-
-      <ul class="usernamesAndSizes">
-        <li class="header">
-          <span>Name</span>
-          <span>Estimate</span>
-        </li>
-      </ul>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>

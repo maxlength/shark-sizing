@@ -80,7 +80,7 @@ $(() => {
 
   socket.on("estimates resetted", () => {
     $estimatesList.find(".size").removeClass("selected");
-    $mostVotedPanel.html("");
+    _closeMostVotedPanel();
   });
 
   // Show or hide all estimates
@@ -104,9 +104,22 @@ $(() => {
 
   socket.on("most voted estimates", mostVotedEstimates => {
     mostVotedEstimates.length &&
-      $mostVotedPanel.html(
-        `Most voted estimate(s): <span>${mostVotedEstimates.toString()}</span>`
-      );
+      $mostVotedPanel
+        .addClass("active")
+        .find(".text")
+        .html(
+          `Most voted estimate(s): <span>${mostVotedEstimates.join(
+            " - "
+          )}</span>`
+        );
+  });
+
+  $mostVotedPanel.find("button").on("click", e => {
+    socket.emit("close most voted estimates", room);
+  });
+
+  socket.on("most voted estimates closed", () => {
+    _closeMostVotedPanel();
   });
 
   // Update list of the users, the estimates, the status of the users
@@ -133,6 +146,13 @@ $(() => {
 
     socket.emit("remove user", { room, usernameToRemove });
   });
+
+  const _closeMostVotedPanel = () => {
+    $mostVotedPanel
+      .removeClass("active")
+      .find(".text")
+      .html("");
+  };
 
   const _copyToClipboard = () => {
     const tempTextarea = document.createElement("textarea");
