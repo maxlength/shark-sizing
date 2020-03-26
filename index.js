@@ -81,18 +81,19 @@ io.on("connection", socket => {
   socket.on("disconnect", () => {
     connections.splice(connections.indexOf(socket), 1);
     let room = _getRoomById(socket.room);
-    if (room) {
+    if (room && room["users"]) {
       let user = _getUserByUsername(room["users"], socket.user.username);
       if (user) {
-        user = {
-          status: "disconnected",
-          estimate: "-",
-          hasVoted: false
-        };
+        room["users"].splice(room["users"].indexOf(user), 1);
       }
-    }
 
-    _emitUpdatedUsers(socket.room);
+      if(room["users"].length === 0) {
+        rooms.splice(rooms.indexOf(room), 1);
+      } else {
+        _emitUpdatedUsers(socket.room);
+      }
+
+    }
 
     console.log(`An user disconnected`);
   });
