@@ -81,7 +81,19 @@ header .title span {
 }
 header button {
   display: inline;
-  margin-left: 20px;
+  margin-left: 15px;
+  box-shadow: none;
+}
+header button:before {
+  content: "";
+  border: 1px solid white;
+  position: relative;
+  left: -10px;
+}
+header button img {
+  position: relative;
+  top: 3px;
+  width: 16px;
 }
 header .welcome {
   position: absolute;
@@ -274,6 +286,7 @@ header .welcome {
   font-size: 70px;
   font-family: "Lobster", cursive;
   color: darkorange;
+  text-shadow: 2px 2px 2px rgba(0,0,0,0.56);
 }
 .mostVotedPanel button {
   width: 200px;
