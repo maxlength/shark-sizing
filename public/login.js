@@ -1,22 +1,22 @@
 $(() => {
-  const roomFromQuery = new URL(window.location.href).searchParams.get("room");
+  const poolFromQuery = new URL(window.location.href).searchParams.get("pool");
 
   const $username = $("#username");
-  const $room = $("#room");
+  const $pool = $("#pool");
 
-  if (roomFromQuery) {
-    $room.val(roomFromQuery);
+  if (poolFromQuery) {
+    $pool.val(poolFromQuery);
   }
 
-  const $createRoomForm = $("#createRoomForm");
+  const $createPoolForm = $("#createPoolForm");
 
-  $createRoomForm.find("[type='submit']").on("click", e => {
+  $createPoolForm.find("[type='submit']").on("click", e => {
     e.preventDefault();
 
-    if ($("#usernameCreateRoom").val()) {
-      $.ajax("/getNewRoom")
-      .success(newRoom => {
-        $createRoomForm.attr("action", `/room/${newRoom}`).submit();
+    if ($("#usernameCreatePool").val()) {
+      $.ajax("/getNewPool")
+      .success(newPool => {
+        $createPoolForm.attr("action", `/pool/${newPool}`).submit();
       });
     }
 
@@ -29,26 +29,26 @@ $(() => {
     e.preventDefault();
 
     const username = $username.val();
-    const room = $room.val();
+    const pool = $pool.val();
 
-    if (username && room) {
+    if (username && pool) {
       $(".error").remove();
 
-      $.ajax("/getUsernameAndRoomAvailability", {
+      $.ajax("/getUsernameAndPoolAvailability", {
         data: {
           username,
-          room
+          pool
         }
       })
         .success(res => {
-          $loginForm.attr("action", `/room/${room}`).submit();
+          $loginForm.attr("action", `/pool/${pool}`).submit();
         })
         .error(res => {
           if (res.status === 401) {
             const error = res.responseText;
-            if (error === "noroom") {
-              $room.after(
-                `<span class="error">Sorry the room doesn't exist :(</span>`
+            if (error === "nopool") {
+              $pool.after(
+                `<span class="error">Sorry the pool doesn't exist :(</span>`
               );
             }
             if (error === "usernameunavailable") {

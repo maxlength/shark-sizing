@@ -122,32 +122,32 @@
     <div id="login" class="card">
       <div>
         <p>
-          <h2>Create a scrum poker room now?</h2>
+          <h2>Create a scrum poker pool now?</h2>
           <span class="body">
-            Enter name and your poker room will be created. Share the room ID with others to start planning and estimating story points online and for free.
+            Enter name and your poker pool will be created. Share the pool ID with others to start planning and estimating story points.
           </span>
         </p>
-        <form id="createRoomForm" action="/room" method="POST">
+        <form id="createPoolForm" action="/pool" method="POST">
           <label>Username</label>
-          <input id="usernameCreateRoom" name="username" type="text" />
+          <input id="usernameCreatePool" name="username" type="text" />
           <input type="hidden" name="admin" value="true" />
-          <button type="submit">Create Room</button>
+          <button type="submit">Create the pool (congrats, you're the alpha shark)</button>
         </form>
       </div>
 
       <div>
         <p>
-          <h2>Somebody already created a poker room?</h2>
+          <h2>Somebody already created a poker pool?</h2>
           <span class="body">
-            Enter your name and the room ID and you can start your sprint planning: estimate the effort or story points.
+            Enter your name and the pool ID and you can start your sprint planning: estimate the effort or story points.
           </span>
         </p>
-        <form id="loginForm" action="/room" method="POST">
+        <form id="loginForm" action="/pool" method="POST">
           <label>Username</label>
           <input id="username" name="username" type="text" />
-          <label>Room</label>
-          <input id="room" name="room" type="text" />
-          <button type="submit">Enter Room</button>
+          <label>Pool</label>
+          <input id="pool" name="pool" type="text" />
+          <button type="submit">Enter a pool full of sharks</button>
         </form>
       </div>
     </div>

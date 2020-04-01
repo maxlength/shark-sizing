@@ -83,6 +83,7 @@ header button {
   display: inline;
   margin-left: 15px;
   box-shadow: none;
+  color: darkorange;
 }
 header button:before {
   content: "";
@@ -99,6 +100,9 @@ header .welcome {
   position: absolute;
   right: 25px;
 }
+header .pool {
+  color: darkorange;
+}
 .copiedLink {
   display: none;
   position: fixed;
@@ -106,7 +110,7 @@ header .welcome {
   text-align: center;
   top: 0;
   left: 0;
-  background: #378cc8;
+  background: darkorange;
   color: white;
 }
 .storyToEstimate {
@@ -163,6 +167,14 @@ header .welcome {
   font-weight: bold;
   margin: 0;
 }
+.sizes .size.novote p {
+  font-size: 20px;
+}
+.sizes .size span {
+  font-size: 12px;
+  margin-top: 10px;
+  display: inline-block;
+}
 .sizes .size button {
   position: absolute;
   top: 0;
@@ -176,7 +188,8 @@ header .welcome {
   border-color: darkorange;
   background-color: darkorange;
 }
-.sizes .size.selected p {
+.sizes .size.selected p,
+.sizes .size.selected span {
   color: white;
 }
 .usernamesAndSizes {

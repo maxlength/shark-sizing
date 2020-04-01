@@ -7,9 +7,9 @@ const bodyParser = require("body-parser");
 const PORT = process.env.PORT || 3000;
 let connections = [];
 let usernameServer = "";
-let roomServer = "";
+let poolServer = "";
 let adminServer = false;
-let rooms = [];
+let pools = [];
 let toggledClassName = "hiddenEstimates";
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,15 +19,15 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/login.html");
 });
 
-app.get("/getUsernameAndRoomAvailability", (req, res) => {
+app.get("/getUsernameAndPoolAvailability", (req, res) => {
   let msg = "ok",
     status = 200;
-  let room = _getRoomById(req.query.room);
+  let pool = _getPoolById(req.query.pool);
 
-  if (_noRoomToJoin(room)) {
-    msg = "noroom";
+  if (_noPoolToJoin(pool)) {
+    msg = "nopool";
     status = 401;
-  } else if (_isUsernameAlreadyUsed(room["users"], req.query.username)) {
+  } else if (_isUsernameAlreadyUsed(pool["users"], req.query.username)) {
     msg = "usernameunavailable";
     status = 401;
   }
@@ -35,28 +35,28 @@ app.get("/getUsernameAndRoomAvailability", (req, res) => {
   res.status(status).send(msg);
 });
 
-app.get("/getNewRoom", (req, res) => {
-  let isRoomAlreadyExisting = true;
-  let newRoomId;
+app.get("/getNewPool", (req, res) => {
+  let isPoolAlreadyExisting = true;
+  let newPoolId;
 
-  while(isRoomAlreadyExisting) {
-    newRoomId = Math.floor(Math.random() * 1000000) + 1;
-    let existingRoom = _getRoomById(newRoomId);
-    if(!existingRoom) {
-      isRoomAlreadyExisting = false;
+  while(isPoolAlreadyExisting) {
+    newPoolId = Math.floor(Math.random() * 1000000) + 1;
+    let existingPool = _getPoolById(newPoolId);
+    if(!existingPool) {
+      isPoolAlreadyExisting = false;
     }
   }
 
-  res.status(200).send(newRoomId.toString());
+  res.status(200).send(newPoolId.toString());
 });
 
-app.get("/room/:room", (req, res) => {
-  res.redirect("/?room=" + req.params.room);
+app.get("/pool/:pool", (req, res) => {
+  res.redirect("/?pool=" + req.params.pool);
 });
 
-app.post("/room/:room", (req, res) => {
+app.post("/pool/:pool", (req, res) => {
   usernameServer = req.body.username;
-  roomServer = req.params.room;
+  poolServer = req.params.pool;
   adminServer = req.body.admin;
 
   res.sendFile(__dirname + "/index.html");
@@ -67,46 +67,46 @@ io.on("connection", socket => {
 
   console.log(`An user connected`);
 
-  socket.on("join", room => {
-    socket.join(room);
-    socket.room = roomServer;
+  socket.on("join", pool => {
+    socket.join(pool);
+    socket.pool = poolServer;
     socket.user = {
       username: usernameServer,
       isAdmin: adminServer
     };
 
-    let requestedRoom = _getRoomById(room);
+    let requestedPool = _getPoolById(pool);
 
-    if (requestedRoom === undefined) {
-      _createRoom(room, rooms);
+    if (requestedPool === undefined) {
+      _createPool(pool, pools);
     }
 
-    _createUser(room, socket.user.username);
+    _createUser(pool, socket.user.username);
 
-    io.to(room).emit("set username", socket.user.username);
+    io.to(pool).emit("set username", socket.user.username);
 
     if (socket.user.isAdmin) {
-      io.to(room).emit("set admin", "admin");
+      io.to(pool).emit("set admin", "admin");
     }
 
-    _emitUpdatedUsers(room);
-    _emitUpdatedStory(room);
-    _toggleSelectedEstimatesVisibility(room);
+    _emitUpdatedUsers(pool);
+    _emitUpdatedStory(pool);
+    _toggleSelectedEstimatesVisibility(pool);
   });
 
   socket.on("disconnect", () => {
     connections.splice(connections.indexOf(socket), 1);
-    let room = _getRoomById(socket.room);
-    if (room && room["users"]) {
-      let user = _getUserByUsername(room["users"], socket.user.username);
+    let pool = _getPoolById(socket.pool);
+    if (pool && pool["users"]) {
+      let user = _getUserByUsername(pool["users"], socket.user.username);
       if (user) {
-        room["users"].splice(room["users"].indexOf(user), 1);
+        pool["users"].splice(pool["users"].indexOf(user), 1);
       }
 
-      if(room["users"].length === 0) {
-        rooms.splice(rooms.indexOf(room), 1);
+      if(pool["users"].length === 0) {
+        pools.splice(pools.indexOf(pool), 1);
       } else {
-        _emitUpdatedUsers(socket.room);
+        _emitUpdatedUsers(socket.pool);
       }
 
     }
@@ -114,41 +114,41 @@ io.on("connection", socket => {
     console.log(`An user disconnected`);
   });
 
-  socket.on("update story name", ({ room, story }) => {
-    _emitUpdatedStory(room, story);
+  socket.on("update story name", ({ pool, story }) => {
+    _emitUpdatedStory(pool, story);
   });
 
-  socket.on("estimate selected", ({ room, username, estimate }) => {
-    let users = _getUsersByRoom(room);
+  socket.on("estimate selected", ({ pool, username, estimate }) => {
+    let users = _getUsersByPool(pool);
     let user = _getUserByUsername(users, username);
 
     user.estimate = estimate;
     user.hasVoted = true;
 
-    _emitUpdatedUsers(room);
+    _emitUpdatedUsers(pool);
   });
 
-  socket.on("reset estimates", room => {
-    let users = _getUsersByRoom(room);
+  socket.on("reset estimates", pool => {
+    let users = _getUsersByPool(pool);
     for (let user of users) {
       user.estimate = "-";
       user.hasVoted = false;
     }
 
-    _emitUpdatedUsers(room);
+    _emitUpdatedUsers(pool);
 
-    io.in(room).emit("estimates resetted");
+    io.in(pool).emit("estimates resetted");
   });
 
-  socket.on("toggle estimates", ({ room, className }) => {
+  socket.on("toggle estimates", ({ pool, className }) => {
     toggledClassName =
       className === "hiddenEstimates" ? "shownEstimates" : "hiddenEstimates";
-    _toggleSelectedEstimatesVisibility(room);
+    _toggleSelectedEstimatesVisibility(pool);
   });
 
-  socket.on("get most voted estimates", room => {
+  socket.on("get most voted estimates", pool => {
     let allEstimates = [];
-    let users = _getRoomById(room)["users"];
+    let users = _getPoolById(pool)["users"];
 
     for (let user of users) {
       if (user.estimate !== "-") {
@@ -158,40 +158,40 @@ io.on("connection", socket => {
 
     let mostUsedEstimates = _getArrayElementsWithMostOccurrences(allEstimates);
 
-    io.in(room).emit("most voted estimates", mostUsedEstimates);
+    io.in(pool).emit("most voted estimates", mostUsedEstimates);
   });
 
-  socket.on("close most voted estimates", room => {
-    io.in(room).emit("most voted estimates closed");
+  socket.on("close most voted estimates", pool => {
+    io.in(pool).emit("most voted estimates closed");
   });
 
-  socket.on("remove user", ({ room, usernameToRemove }) => {
-    let users = _getUsersByRoom(room);
+  socket.on("remove user", ({ pool, usernameToRemove }) => {
+    let users = _getUsersByPool(pool);
     let user = _getUserByUsername(users, usernameToRemove);
     users.splice(users.indexOf(user), 1);
 
-    _emitUpdatedUsers(room);
+    _emitUpdatedUsers(pool);
 
     console.log(`${usernameToRemove} was removed`);
   });
 });
 
-const _toggleSelectedEstimatesVisibility = room => {
-  io.in(room).emit("estimates toggled", toggledClassName);
+const _toggleSelectedEstimatesVisibility = pool => {
+  io.in(pool).emit("estimates toggled", toggledClassName);
 };
 
-const _emitUpdatedUsers = room => {
-  let roomById = _getRoomById(room);
-  roomById && io.in(room).emit("users updated", roomById["users"]);
+const _emitUpdatedUsers = pool => {
+  let poolById = _getPoolById(pool);
+  poolById && io.in(pool).emit("users updated", poolById["users"]);
 };
 
-const _emitUpdatedStory = (room, updatedStory) => {
-  let roomById = _getRoomById(room);
-  if(roomById) {
+const _emitUpdatedStory = (pool, updatedStory) => {
+  let poolById = _getPoolById(pool);
+  if(poolById) {
     if(updatedStory) {
-      roomById.story = updatedStory;
+      poolById.story = updatedStory;
     }
-    io.in(room).emit("story updated", roomById.story);
+    io.in(pool).emit("story updated", poolById.story);
   }
 };
 
@@ -204,32 +204,32 @@ const _getArrayElementsWithMostOccurrences = arr => {
   return Object.keys(counts).filter(k => counts[k] === maxCount);
 };
 
-const _getRoomById = id => {
-  return rooms.filter(r => r.id == id)[0];
+const _getPoolById = id => {
+  return pools.filter(r => r.id == id)[0];
 };
 
-const _getUsersByRoom = id => {
-  return _getRoomById(id)["users"];
+const _getUsersByPool = id => {
+  return _getPoolById(id)["users"];
 };
 
 const _getUserByUsername = (users, username) => {
   return users.filter(u => u.username == username)[0];
 };
 
-const _noRoomToJoin = room => {
-  return room === undefined;
+const _noPoolToJoin = pool => {
+  return pool === undefined;
 };
 
 const _isUsernameAlreadyUsed = (users, username) => {
   return _getUserByUsername(users, username) !== undefined;
 };
 
-const _createRoom = (id, rooms) => {
-  rooms.push({ id: id, users: [], story: '' });
+const _createPool = (id, pools) => {
+  pools.push({ id: id, users: [], story: '' });
 };
 
-const _createUser = (room, username) => {
-  let users = _getUsersByRoom(room);
+const _createUser = (pool, username) => {
+  let users = _getUsersByPool(pool);
   let user = _getUserByUsername(users, username);
 
   if (!user) {

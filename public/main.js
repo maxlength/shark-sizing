@@ -1,9 +1,9 @@
 $(() => {
   const socket = io();
   const href = window.location.href;
-  const room = href.substring(href.lastIndexOf("/") + 1);
+  const pool = href.substring(href.lastIndexOf("/") + 1);
 
-  socket.emit("join", room);
+  socket.emit("join", pool);
 
   let $username = $(".username");
   let username = "";
@@ -27,6 +27,10 @@ $(() => {
     $username.text(username);
   });
 
+  // Set pool in welcome message
+
+  $('.pool').text(pool);
+
   // Set admin class for privileges
 
   socket.once("set admin", admin => {
@@ -44,7 +48,7 @@ $(() => {
   // Enter or update User story name
 
   $story.on("keyup", e => {
-    socket.emit("update story name", { room, story: e.target.value });
+    socket.emit("update story name", { pool, story: e.target.value });
   });
 
   $resetStoryButton.on("click", () => {
@@ -62,7 +66,7 @@ $(() => {
     $estimatesList.find(".size").removeClass("selected");
     $estimateButton.closest(".size").addClass("selected");
     socket.emit("estimate selected", {
-      room,
+      pool,
       username,
       estimate: $estimateButton.data("size")
     });
@@ -72,9 +76,9 @@ $(() => {
 
   $resetEstimatesButton.on("click", e => {
     if (
-      confirm("Are you sure you want to delete all estimates in this room?")
+      confirm("Are you sure you want to delete all estimates in this pool?")
     ) {
-      socket.emit("reset estimates", room);
+      socket.emit("reset estimates", pool);
     }
   });
 
@@ -87,7 +91,7 @@ $(() => {
 
   $toggleEstimatesButton.on("click", e => {
     socket.emit("toggle estimates", {
-      room,
+      pool,
       className: $("#sizingPanel").attr("class")
     });
   });
@@ -99,7 +103,7 @@ $(() => {
   // Show the most voted estimate(s)
 
   $mostVotedEstimatesButton.on("click", e => {
-    socket.emit("get most voted estimates", room);
+    socket.emit("get most voted estimates", pool);
   });
 
   socket.on("most voted estimates", mostVotedEstimates => {
@@ -115,7 +119,7 @@ $(() => {
   });
 
   $mostVotedPanel.find("button").on("click", e => {
-    socket.emit("close most voted estimates", room);
+    socket.emit("close most voted estimates", pool);
   });
 
   socket.on("most voted estimates closed", () => {
@@ -144,7 +148,7 @@ $(() => {
       .closest("[data-username]")
       .data("username");
 
-    socket.emit("remove user", { room, usernameToRemove });
+    socket.emit("remove user", { pool, usernameToRemove });
   });
 
   const _closeMostVotedPanel = () => {
