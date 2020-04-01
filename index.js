@@ -90,6 +90,7 @@ io.on("connection", socket => {
     }
 
     _emitUpdatedUsers(room);
+    _emitUpdatedStory(room);
     _toggleSelectedEstimatesVisibility(room);
   });
 
@@ -114,7 +115,7 @@ io.on("connection", socket => {
   });
 
   socket.on("update story name", ({ room, story }) => {
-    io.in(room).emit("story updated", story);
+    _emitUpdatedStory(room, story);
   });
 
   socket.on("estimate selected", ({ room, username, estimate }) => {
@@ -184,6 +185,16 @@ const _emitUpdatedUsers = room => {
   roomById && io.in(room).emit("users updated", roomById["users"]);
 };
 
+const _emitUpdatedStory = (room, updatedStory) => {
+  let roomById = _getRoomById(room);
+  if(roomById) {
+    if(updatedStory) {
+      roomById.story = updatedStory;
+    }
+    io.in(room).emit("story updated", roomById.story);
+  }
+};
+
 const _getArrayElementsWithMostOccurrences = arr => {
   let counts = arr.reduce((a, c) => {
     a[c] = (a[c] || 0) + 1;
@@ -214,7 +225,7 @@ const _isUsernameAlreadyUsed = (users, username) => {
 };
 
 const _createRoom = (id, rooms) => {
-  rooms.push({ id: id, users: [] });
+  rooms.push({ id: id, users: [], story: '' });
 };
 
 const _createUser = (room, username) => {

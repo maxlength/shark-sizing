@@ -109,14 +109,13 @@ header .welcome {
   background: #378cc8;
   color: white;
 }
-#sizingPanel {
-}
 .storyToEstimate {
   text-align: center;
   margin-top: 50px;
 }
 .storyToEstimate input,
-.storyToEstimate button {
+.storyToEstimate button,
+.storyToEstimate .description {
   display: none;
 }
 .admin .storyToEstimate input {
@@ -130,13 +129,13 @@ header .welcome {
   color: white;
   padding: 10px;
 }
+.admin .storyToEstimate .description {
+  display: block;
+}
 .storyToEstimate h2 {
   font-family: "Lobster", cursive;
   font-size: 30px;
   height: 30px;
-}
-.admin .storyToEstimate h2 {
-  display: none;
 }
 .sizes {
   display: flex;
