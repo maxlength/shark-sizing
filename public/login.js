@@ -13,10 +13,11 @@ $(() => {
   $createRoomForm.find("[type='submit']").on("click", e => {
     e.preventDefault();
 
-    const newRoom = Math.floor(Math.random() * 1000000) + 1;
-
-    if ($("#usernameCreateRoom").val() && newRoom) {
-      $createRoomForm.attr("action", `/room/${newRoom}`).submit();
+    if ($("#usernameCreateRoom").val()) {
+      $.ajax("/getNewRoom")
+      .success(newRoom => {
+        $createRoomForm.attr("action", `/room/${newRoom}`).submit();
+      });
     }
 
     return false;

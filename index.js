@@ -35,6 +35,21 @@ app.get("/getUsernameAndRoomAvailability", (req, res) => {
   res.status(status).send(msg);
 });
 
+app.get("/getNewRoom", (req, res) => {
+  let isRoomAlreadyExisting = true;
+  let newRoomId;
+
+  while(isRoomAlreadyExisting) {
+    newRoomId = Math.floor(Math.random() * 1000000) + 1;
+    let existingRoom = _getRoomById(newRoomId);
+    if(!existingRoom) {
+      isRoomAlreadyExisting = false;
+    }
+  }
+
+  res.status(200).send(newRoomId.toString());
+});
+
 app.get("/room/:room", (req, res) => {
   res.redirect("/?room=" + req.params.room);
 });
