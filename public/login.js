@@ -6,6 +6,7 @@ $(() => {
 
   if (poolFromQuery) {
     $pool.val(poolFromQuery);
+    $(".createPanel").hide();
   }
 
   const $createPoolForm = $("#createPoolForm");
@@ -14,8 +15,7 @@ $(() => {
     e.preventDefault();
 
     if ($("#usernameCreatePool").val()) {
-      $.ajax("/getNewPool")
-      .success(newPool => {
+      $.ajax("/getNewPool").success(newPool => {
         $createPoolForm.attr("action", `/pool/${newPool}`).submit();
       });
     }

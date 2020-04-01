@@ -45,6 +45,9 @@
       /** ===============
  * Mini reset end
  */
+      body {
+        padding-bottom: 50px;
+      }
       .logo {
         width: 300px;
         height: 150px;
@@ -115,12 +118,53 @@
       button {
         box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
       }
+      .wave {
+        position: fixed;
+        bottom: -12vw;
+        left: 0;
+      }
+      .parallax > use {
+        animation:move-forever 12s linear infinite;
+      }
+      .parallax > use:nth-child(1) {
+        animation-delay:-2s;
+      }
+      .parallax > use:nth-child(2) {
+        animation-delay:-2s;
+        animation-duration:5s;
+      }
+      .parallax > use:nth-child(3) {
+        animation-delay:-4s;
+        animation-duration:3s;
+      }
+
+      @keyframes move-forever{
+        0%{transform: translate(-90px , 0%)}
+        100%{transform: translate(85px , 0%)} 
+      }
+
+      .shark {
+        position: fixed;
+        bottom: -20px;
+        left: 0;
+      }
+      .shark > g {
+        animation:shark-move-forever 20s linear infinite;
+      }
+      @keyframes shark-move-forever{
+        0%{transform: translate(-100vh , 0px)}
+        20%{transform: translate(-60vh , 100px)}
+        40%{transform: translate(-20vh , 0px)}
+        60%{transform: translate(20vh , 100px)}
+        80%{transform: translate(60vh , 0px)}
+        100%{transform: translate(100vh , 100px)} 
+      }
     </style>
   </head>
   <body>
     <div class="logo"></div>
     <div id="login" class="card">
-      <div>
+      <div class="createPanel">
         <p>
           <h2>Create a scrum poker pool now?</h2>
           <span class="body">
@@ -135,7 +179,7 @@
         </form>
       </div>
 
-      <div>
+      <div class="joinPanel">
         <p>
           <h2>Somebody already created a poker pool?</h2>
           <span class="body">
@@ -151,6 +195,34 @@
         </form>
       </div>
     </div>
+
+    <svg class="shark" xmlns:osb="http://www.openswatchbook.org/uri/2009/osb" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" id="svg3713" sodipodi:docname="sharky.svg" inkscape:version="0.92.3 (2405546, 2018-03-11)" enable-background="new" height="132" viewBox="0 0 171 132" width="100%"><g inkscape:groupmode="layer" id="layer6" inkscape:label="spinefin">
+      <g id="g890" transform="translate(-1191,-91)">
+      <path sodipodi:nodetypes="ccscc" inkscape:connector-curvature="0" id="path854" d="m 1227.8526,227.2873 c 0.4474,-46.89705 1.7496,-78.12816 -34.3681,-114.91819 -3.5809,-7.69805 -3.1911,-16.490321 10.203,-16.378526 51.8323,0.432623 120.6243,52.247226 158.4153,114.381186 z" style="fill:#00b3f7;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"></path>
+      <path sodipodi:nodetypes="cccc" inkscape:connector-curvature="0" id="path856" d="m 1226.6972,180.00941 c 28.502,0.88405 59.653,2.77247 107.077,33.93176 -34.3779,4.33162 -68.74,8.66125 -105.9216,13.34613 0.4684,-15.56509 0.4996,-31.67816 -1.1554,-47.27789 z" style="display:inline;opacity:1;fill:#009deb;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"></path>
+      </g>
+        </g></svg>
+
+    <svg class="wave"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 24 150 28"
+    preserveAspectRatio="none">
+    <defs>
+      <path id="gentle-wave"
+      d="M-160 44c30 0 
+        58-18 88-18s
+        58 18 88 18 
+        58-18 88-18 
+        58 18 88 18
+        v44h-352z" />
+    </defs>
+    <g class="parallax">
+      <use xlink:href="#gentle-wave" x="50" y="0" fill="#4579e2"/>
+      <use xlink:href="#gentle-wave" x="50" y="3" fill="#3461c1"/>
+      <use xlink:href="#gentle-wave" x="50" y="6" fill="#2d55aa"/>  
+    </g>
+    </svg>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
