@@ -40,18 +40,46 @@
     /** ===============
 * Mini reset end
 */
-    ul {
+    .board {
       display: flex;
       flex-wrap: wrap;
+    }
+    .currentTile {
+      width: 100px;
+    }
+    .board {
       width: 700px;
     }
-    li {
+    .tile {
       flex: 1 0 100px;
       height: 100px;
       border: 1px solid;
-      padding: 10px;
+      background-color: chocolate;
+    }
+    .subtiles {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    .subtiles li {
+      flex: 1 0 33.33%;
+      height: 33.33px;
+      overflow: hidden;
+    }
+    .road {
+      background-color: white;
+    }
+    .treasure {
+      background-size: 100%;
+      background-repeat: no-repeat;
+    }
+    .fantasma {
+      background-image: url("/img/fantasma.jpg");
     }
   </style>
 </head>
-<body></body>
+<body>
+  <div class="currentTile"></div>
+  <div class="board"></div>
+</body>
 <script src="/labirinto.js" type="text/javascript"></script>

@@ -2,21 +2,53 @@ class Tile {
   constructor(
     type,
     treasure = null,
-    position = 0,
-    up = 0,
-    down = 0,
-    left = 0,
-    right = 0,
-    isOutOfBoard = false
+    up = false,
+    down = false,
+    left = false,
+    right = false,
+    isOutOfBoard = false,
+    position = 0
   ) {
     this.type = type; // I, T, L, X
     this.treasure = treasure;
-    this.position = position; // 0, 1, 2...
     this.up = up;
     this.down = down;
     this.left = left;
     this.right = right;
     this.isOutOfBoard = isOutOfBoard;
+    this.position = position; // 0, 1, 2...
+
+    this.orientate();
+  }
+
+  orientate() {
+    switch (this.type) {
+      case "I":
+        this.up = this.down = Boolean(Math.round(Math.random()));
+        this.left = this.right = !this.up;
+        break;
+      case "L":
+        this.up = Boolean(Math.round(Math.random()));
+        this.left = Boolean(Math.round(Math.random()));
+        this.down = !this.up;
+        this.right = !this.left;
+        break;
+      case "T":
+        this.up = Boolean(Math.round(Math.random()));
+        this.down = Boolean(Math.round(Math.random()));
+        if (this.up && this.down) {
+          this.left = Boolean(Math.round(Math.random()));
+          this.right = !this.left;
+        } else if (!this.up || !this.down) {
+          this.left = this.right = true;
+
+          if (!this.up && !this.down) {
+            this.up = Boolean(Math.round(Math.random()));
+            this.down = !this.up;
+          }
+        }
+        break;
+    }
   }
 }
 
@@ -26,12 +58,12 @@ class Tile {
 // 16 tessere bloccate
 // const moveableTiles = [
 const moveableTiles = [
-  new Tile("T", "Pipistrello"),
-  new Tile("T", "Fantasma"),
-  new Tile("T", "Genio"),
-  new Tile("T", "Gnomo"),
-  new Tile("T", "Drago"),
-  new Tile("T", "Fata"),
+  new Tile("T", "pipistrello"),
+  new Tile("T", "fantasma"),
+  new Tile("T", "genio"),
+  new Tile("T", "gnomo"),
+  new Tile("T", "drago"),
+  new Tile("T", "fata"),
   new Tile("I"),
   new Tile("I"),
   new Tile("I"),
@@ -44,12 +76,12 @@ const moveableTiles = [
   new Tile("I"),
   new Tile("I"),
   new Tile("I"),
-  new Tile("L", "Topo"),
-  new Tile("L", "Ragno"),
-  new Tile("L", "Lucertola"),
-  new Tile("L", "Gufo"),
-  new Tile("L", "Scarabeo"),
-  new Tile("L", "Falena"),
+  new Tile("L", "topo"),
+  new Tile("L", "ragno"),
+  new Tile("L", "lucertola"),
+  new Tile("L", "gufo"),
+  new Tile("L", "scarabeo"),
+  new Tile("L", "falena"),
   new Tile("L"),
   new Tile("L"),
   new Tile("L"),
@@ -86,22 +118,22 @@ console.log(moveableTiles.length);
 var board = moveableTiles;
 
 const blocksTiles = [
-  { pos: 33, tile: new Tile("X", "Blue") },
-  { pos: 32, tile: new Tile("X", "Elmo") },
-  { pos: 31, tile: new Tile("X", "Candelabro") },
-  { pos: 30, tile: new Tile("X", "Verde") },
-  { pos: 23, tile: new Tile("X", "Spada") },
-  { pos: 22, tile: new Tile("X", "Smeraldo") },
-  { pos: 21, tile: new Tile("X", "Tesoro") },
-  { pos: 20, tile: new Tile("X", "Anello") },
-  { pos: 13, tile: new Tile("X", "Teschio") },
-  { pos: 12, tile: new Tile("X", "Chiavi") },
-  { pos: 11, tile: new Tile("X", "Corona") },
-  { pos: 10, tile: new Tile("X", "Mappa") },
-  { pos: 3, tile: new Tile("X", "Rosso") },
-  { pos: 2, tile: new Tile("X", "Bottino") },
-  { pos: 1, tile: new Tile("X", "Libro") },
-  { pos: 0, tile: new Tile("X", "Giallo") },
+  { pos: 33, tile: new Tile("X", "blu", true, false, true, false) },
+  { pos: 32, tile: new Tile("X", "elmo", true, false, true, true) },
+  { pos: 31, tile: new Tile("X", "candelabro", true, false, true, true) },
+  { pos: 30, tile: new Tile("X", "verde", true, false, false, true) },
+  { pos: 23, tile: new Tile("X", "spada", true, true, true, false) },
+  { pos: 22, tile: new Tile("X", "smeraldo", true, true, true, false) },
+  { pos: 21, tile: new Tile("X", "tesoro", true, false, true, true) },
+  { pos: 20, tile: new Tile("X", "anello", true, true, false, true) },
+  { pos: 13, tile: new Tile("X", "teschio", true, true, true, false) },
+  { pos: 12, tile: new Tile("X", "chiavi", false, true, true, true) },
+  { pos: 11, tile: new Tile("X", "corona", true, true, false, true) },
+  { pos: 10, tile: new Tile("X", "mMappa", true, true, false, true) },
+  { pos: 3, tile: new Tile("X", "rosso", false, true, true, false) },
+  { pos: 2, tile: new Tile("X", "bottino", false, true, true, true) },
+  { pos: 1, tile: new Tile("X", "libro", false, true, true, true) },
+  { pos: 0, tile: new Tile("X", "giallo", false, true, false, true) },
 ];
 
 function shuffle(a) {
@@ -126,19 +158,45 @@ console.log(board.length);
 
 var body = document.getElementsByTagName("body")[0];
 
-function renderBoard() {
-  var ul = document.createElement("UL");
-  for (let i = 0; i < board.length; i++) {
-    var li = document.createElement("LI");
-    var liText = document.createTextNode(board[i].type);
-    li.appendChild(liText);
-    ul.appendChild(li);
+function renderTile(tile, ulToAppendTo) {
+  var div = document.createElement("DIV");
+  div.classList.add("tile");
+  var newUl = document.createElement("UL");
+  newUl.classList.add("subtiles");
+  for (let j = 0; j < 9; j++) {
+    var newLi = document.createElement("LI");
+    newLi.classList.add("subtile");
+    if (
+      j == 4 ||
+      (j == 1 && tile.up) ||
+      (j == 3 && tile.left) ||
+      (j == 5 && tile.right) ||
+      (j == 7 && tile.down)
+    ) {
+      newLi.classList.add("road");
+    }
+    if (j == 4 && tile.treasure) {
+      newLi.classList.add("treasure");
+      newLi.classList.add(tile.treasure);
+    }
+    newUl.appendChild(newLi);
   }
-  body.appendChild(ul);
+
+  div.appendChild(newUl);
+  ulToAppendTo.appendChild(div);
+}
+
+function renderBoard() {
+  var boardDom = document.getElementsByClassName("board")[0];
+  for (let i = 0; i < board.length; i++) {
+    renderTile(board[i], boardDom);
+  }
 }
 
 renderBoard();
 
-// for (let i = 0; i < board.length; i++) {
-//   console.log(board[i]);
-// }
+renderTile(randomTile, document.getElementsByClassName("currentTile")[0]);
+
+for (let i = 0; i < board.length; i++) {
+  console.log(board[i]);
+}
