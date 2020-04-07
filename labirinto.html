@@ -43,9 +43,13 @@
     .board {
       display: flex;
       flex-wrap: wrap;
+      margin: 100px auto;
     }
     .currentTile {
       width: 100px;
+      position: fixed;
+      top: 100px;
+      left: 100px;
     }
     .board {
       width: 700px;
@@ -73,12 +77,93 @@
       background-size: 100%;
       background-repeat: no-repeat;
     }
+
+    .anello {
+      background-image: url("/img/anello.jpg");
+    }
+    .bottino {
+      background-image: url("/img/bottino.jpg");
+    }
+    .candelabro {
+      background-image: url("/img/candelabro.jpg");
+    }
+    .chiavi {
+      background-image: url("/img/chiavi.jpg");
+    }
+    .corona {
+      background-image: url("/img/corona.jpg");
+    }
+    .drago {
+      background-image: url("/img/drago.jpg");
+    }
+    .elmo {
+      background-image: url("/img/elmo.jpg");
+    }
+    .falena {
+      background-image: url("/img/falena.jpg");
+    }
     .fantasma {
       background-image: url("/img/fantasma.jpg");
+    }
+    .fata {
+      background-image: url("/img/fata.jpg");
+    }
+    .genio {
+      background-image: url("/img/genio.jpg");
+    }
+    .gnomo {
+      background-image: url("/img/gnomo.jpg");
+    }
+    .gufo {
+      background-image: url("/img/gufo.jpg");
+    }
+    .libro {
+      background-image: url("/img/libro.jpg");
+    }
+    .mappa {
+      background-image: url("/img/mappa.jpg");
+    }
+    .pipistrello {
+      background-image: url("/img/pipistrello.jpg");
+    }
+    .ragno {
+      background-image: url("/img/ragno.jpg");
+    }
+    .scarabeo {
+      background-image: url("/img/scarabeo.jpg");
+    }
+    .scrigno {
+      background-image: url("/img/scrigno.jpg");
+    }
+    .smeraldo {
+      background-image: url("/img/smeraldo.jpg");
+    }
+    .spada {
+      background-image: url("/img/spada.jpg");
+    }
+    .teschio {
+      background-image: url("/img/teschio.jpg");
+    }
+    .topo {
+      background-image: url("/img/topo.jpg");
+    }
+
+    .blu {
+      background-color: darkblue;
+    }
+    .giallo {
+      background-color: yellow;
+    }
+    .rosso {
+      background-color: darkred;
+    }
+    .verde {
+      background-color: darkgreen;
     }
   </style>
 </head>
 <body>
+  <button class="rotationButton">Rotate</button>
   <div class="currentTile"></div>
   <div class="board"></div>
 </body>

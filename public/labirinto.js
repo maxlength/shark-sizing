@@ -200,3 +200,56 @@ renderTile(randomTile, document.getElementsByClassName("currentTile")[0]);
 for (let i = 0; i < board.length; i++) {
   console.log(board[i]);
 }
+
+window.currentTile = document.getElementsByClassName("currentTile")[0];
+window.randomTile = randomTile;
+
+window.rotateTile = (tile) => {
+  switch (tile.type) {
+    case "I":
+      tile.up = !tile.up;
+      tile.down = !tile.down;
+      tile.left = !tile.left;
+      tile.right = !tile.right;
+      break;
+    case "L":
+      if (tile.up && tile.left) {
+        tile.left = false;
+        tile.right = true;
+      } else if (tile.up && tile.right) {
+        tile.up = false;
+        tile.down = true;
+      } else if (tile.right && tile.down) {
+        tile.right = false;
+        tile.left = true;
+      } else if (tile.down && tile.left) {
+        tile.down = false;
+        tile.up = true;
+      }
+      break;
+    case "T":
+      if (!tile.up) {
+        tile.up = true;
+        tile.right = false;
+      } else if (!tile.down) {
+        tile.down = true;
+        tile.left = false;
+      } else if (!tile.left) {
+        tile.left = true;
+        tile.up = false;
+      } else if (!tile.right) {
+        tile.right = true;
+        tile.down = false;
+      }
+      break;
+  }
+};
+
+window.renderTile = renderTile;
+
+var rotationButton = document.getElementsByClassName("rotationButton")[0];
+rotationButton.addEventListener("click", () => {
+  window.rotateTile(randomTile);
+  document.getElementsByClassName("currentTile")[0].innerHTML = "";
+  renderTile(randomTile, document.getElementsByClassName("currentTile")[0]);
+});
