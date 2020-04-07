@@ -39,10 +39,10 @@ app.get("/getNewPool", (req, res) => {
   let isPoolAlreadyExisting = true;
   let newPoolId;
 
-  while(isPoolAlreadyExisting) {
+  while (isPoolAlreadyExisting) {
     newPoolId = Math.floor(Math.random() * 1000000) + 1;
     let existingPool = _getPoolById(newPoolId);
-    if(!existingPool) {
+    if (!existingPool) {
       isPoolAlreadyExisting = false;
     }
   }
@@ -62,17 +62,21 @@ app.post("/pool/:pool", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
-io.on("connection", socket => {
+app.get("/labirinto", (req, res) => {
+  res.sendFile(__dirname + "/labirinto.html");
+});
+
+io.on("connection", (socket) => {
   connections.push(socket);
 
   console.log(`An user connected`);
 
-  socket.on("join", pool => {
+  socket.on("join", (pool) => {
     socket.join(pool);
     socket.pool = poolServer;
     socket.user = {
       username: usernameServer,
-      isAdmin: adminServer
+      isAdmin: adminServer,
     };
 
     let requestedPool = _getPoolById(pool);
@@ -103,12 +107,11 @@ io.on("connection", socket => {
         pool["users"].splice(pool["users"].indexOf(user), 1);
       }
 
-      if(pool["users"].length === 0) {
+      if (pool["users"].length === 0) {
         pools.splice(pools.indexOf(pool), 1);
       } else {
         _emitUpdatedUsers(socket.pool);
       }
-
     }
 
     console.log(`An user disconnected`);
@@ -128,7 +131,7 @@ io.on("connection", socket => {
     _emitUpdatedUsers(pool);
   });
 
-  socket.on("reset estimates", pool => {
+  socket.on("reset estimates", (pool) => {
     let users = _getUsersByPool(pool);
     for (let user of users) {
       user.estimate = "-";
@@ -146,7 +149,7 @@ io.on("connection", socket => {
     _toggleSelectedEstimatesVisibility(pool);
   });
 
-  socket.on("get most voted estimates", pool => {
+  socket.on("get most voted estimates", (pool) => {
     let allEstimates = [];
     let users = _getPoolById(pool)["users"];
 
@@ -161,7 +164,7 @@ io.on("connection", socket => {
     io.in(pool).emit("most voted estimates", mostUsedEstimates);
   });
 
-  socket.on("close most voted estimates", pool => {
+  socket.on("close most voted estimates", (pool) => {
     io.in(pool).emit("most voted estimates closed");
   });
 
@@ -176,47 +179,47 @@ io.on("connection", socket => {
   });
 });
 
-const _toggleSelectedEstimatesVisibility = pool => {
+const _toggleSelectedEstimatesVisibility = (pool) => {
   io.in(pool).emit("estimates toggled", toggledClassName);
 };
 
-const _emitUpdatedUsers = pool => {
+const _emitUpdatedUsers = (pool) => {
   let poolById = _getPoolById(pool);
   poolById && io.in(pool).emit("users updated", poolById["users"]);
 };
 
 const _emitUpdatedStory = (pool, updatedStory) => {
   let poolById = _getPoolById(pool);
-  if(poolById) {
-    if(updatedStory) {
+  if (poolById) {
+    if (updatedStory) {
       poolById.story = updatedStory;
     }
     io.in(pool).emit("story updated", poolById.story);
   }
 };
 
-const _getArrayElementsWithMostOccurrences = arr => {
+const _getArrayElementsWithMostOccurrences = (arr) => {
   let counts = arr.reduce((a, c) => {
     a[c] = (a[c] || 0) + 1;
     return a;
   }, {});
   let maxCount = Math.max(...Object.values(counts));
-  return Object.keys(counts).filter(k => counts[k] === maxCount);
+  return Object.keys(counts).filter((k) => counts[k] === maxCount);
 };
 
-const _getPoolById = id => {
-  return pools.filter(r => r.id == id)[0];
+const _getPoolById = (id) => {
+  return pools.filter((r) => r.id == id)[0];
 };
 
-const _getUsersByPool = id => {
+const _getUsersByPool = (id) => {
   return _getPoolById(id)["users"];
 };
 
 const _getUserByUsername = (users, username) => {
-  return users.filter(u => u.username == username)[0];
+  return users.filter((u) => u.username == username)[0];
 };
 
-const _noPoolToJoin = pool => {
+const _noPoolToJoin = (pool) => {
   return pool === undefined;
 };
 
@@ -225,7 +228,7 @@ const _isUsernameAlreadyUsed = (users, username) => {
 };
 
 const _createPool = (id, pools) => {
-  pools.push({ id: id, users: [], story: '' });
+  pools.push({ id: id, users: [], story: "" });
 };
 
 const _createUser = (pool, username) => {
@@ -237,7 +240,7 @@ const _createUser = (pool, username) => {
       username: username,
       status: "connected",
       estimate: "-",
-      hasVoted: false
+      hasVoted: false,
     };
 
     users.push(newUser);
