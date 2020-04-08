@@ -7,7 +7,7 @@ class Tile {
     left = false,
     right = false,
     isOutOfBoard = false,
-    position = 0
+    position = -1
   ) {
     this.type = type; // I, T, L, X
     this.treasure = treasure;
@@ -51,6 +51,11 @@ class Tile {
     }
   }
 }
+
+const TILES_FOR_SIDE = 7;
+const TILE_TO_PLAY_PLACEHOLDER = document.getElementsByClassName(
+  "currentTile"
+)[0];
 
 // 12 tessere I
 // 6 tessere T
@@ -109,10 +114,11 @@ function getRandomInt(min, max) {
 
 // Estrae la prima tessera con cui giocare
 const randomNumber = getRandomInt(0, moveableTiles.length - 1);
-let randomTile = moveableTiles.splice(randomNumber, 1)[0];
-randomTile.isOutOfBoard = true;
+let tileToPlay = moveableTiles.splice(randomNumber, 1)[0];
+tileToPlay.isOutOfBoard = true;
+let previousTileToPlay = tileToPlay;
 
-console.log(randomTile);
+console.log(tileToPlay);
 console.log(moveableTiles.length);
 
 var board = moveableTiles;
@@ -161,48 +167,57 @@ var body = document.getElementsByTagName("body")[0];
 function renderTile(tile, ulToAppendTo) {
   var div = document.createElement("DIV");
   div.classList.add("tile");
-  var newUl = document.createElement("UL");
-  newUl.classList.add("subtiles");
-  for (let j = 0; j < 9; j++) {
-    var newLi = document.createElement("LI");
-    newLi.classList.add("subtile");
-    if (
-      j == 4 ||
-      (j == 1 && tile.up) ||
-      (j == 3 && tile.left) ||
-      (j == 5 && tile.right) ||
-      (j == 7 && tile.down)
-    ) {
-      newLi.classList.add("road");
+  div.dataset["position"] = tile.position;
+  div.dataset["type"] = tile.type;
+  if (tile.type !== "E") {
+    var newUl = document.createElement("UL");
+    newUl.classList.add("subtiles");
+    for (let j = 0; j < 9; j++) {
+      var newLi = document.createElement("LI");
+      newLi.classList.add("subtile");
+      if (
+        j == 4 ||
+        (j == 1 && tile.up) ||
+        (j == 3 && tile.left) ||
+        (j == 5 && tile.right) ||
+        (j == 7 && tile.down)
+      ) {
+        newLi.classList.add("road");
+      }
+      if (j == 4 && tile.treasure) {
+        newLi.classList.add("treasure");
+        newLi.classList.add(tile.treasure);
+      }
+      newUl.appendChild(newLi);
     }
-    if (j == 4 && tile.treasure) {
-      newLi.classList.add("treasure");
-      newLi.classList.add(tile.treasure);
-    }
-    newUl.appendChild(newLi);
+
+    div.appendChild(newUl);
+  } else {
+    div.classList.add("empty");
   }
 
-  div.appendChild(newUl);
   ulToAppendTo.appendChild(div);
 }
 
 function renderBoard() {
   var boardDom = document.getElementsByClassName("board")[0];
+  boardDom.innerHTML = "";
   for (let i = 0; i < board.length; i++) {
-    renderTile(board[i], boardDom);
+    if (board[i]) {
+      renderTile(board[i], boardDom);
+    }
   }
 }
 
 renderBoard();
 
-renderTile(randomTile, document.getElementsByClassName("currentTile")[0]);
+renderTile(tileToPlay, TILE_TO_PLAY_PLACEHOLDER);
 
-for (let i = 0; i < board.length; i++) {
-  console.log(board[i]);
-}
+// for (let i = 0; i < board.length; i++) {
+//   console.log(board[i]);
+// }
 
-window.currentTile = document.getElementsByClassName("currentTile")[0];
-window.randomTile = randomTile;
+window.randomTile = tileToPlay;
 
 window.rotateTile = (tile) => {
   switch (tile.type) {
@@ -249,7 +264,87 @@ window.renderTile = renderTile;
 
 var rotationButton = document.getElementsByClassName("rotationButton")[0];
 rotationButton.addEventListener("click", () => {
-  window.rotateTile(randomTile);
+  window.rotateTile(tileToPlay);
   document.getElementsByClassName("currentTile")[0].innerHTML = "";
-  renderTile(randomTile, document.getElementsByClassName("currentTile")[0]);
+  renderTile(tileToPlay, TILE_TO_PLAY_PLACEHOLDER);
 });
+
+const setTileToPlayInPosition = (pos) => {
+  board[pos] = previousTileToPlay;
+  previousTileToPlay = tileToPlay;
+};
+
+const extractComingOutTile = (pos, from) => {
+  let comingOutTilePosition = -1;
+  if (from === "top") {
+    comingOutTilePosition = pos + (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
+  } else if (from === "bottom") {
+    comingOutTilePosition = pos - (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
+  }
+  const comingOutTile = board[comingOutTilePosition];
+  comingOutTile.isOutOfBoard = true;
+  comingOutTile.position = -1;
+
+  var emptyTile = new Tile("E");
+  emptyTile.position = comingOutTilePosition;
+  board[comingOutTilePosition] = emptyTile;
+
+  tileToPlay = comingOutTile;
+};
+
+const updateTilePosition = (prevPosition, currentPos) => {
+  var tileToMove = board[prevPosition];
+  tileToMove.position = currentPos;
+  var emptyTile = new Tile("E");
+  emptyTile.position = prevPosition;
+  board[currentPos] = tileToMove;
+  board[prevPosition] = emptyTile;
+};
+
+const updateTilesPosition = (pos, from) => {
+  let lastTilePosition = -1;
+  if (from === "top") {
+    lastTilePosition = pos + (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
+    for (
+      currentPos = lastTilePosition;
+      currentPos > 6;
+      currentPos = currentPos - TILES_FOR_SIDE
+    ) {
+      var prevPosition = currentPos - TILES_FOR_SIDE;
+      updateTilePosition(prevPosition, currentPos);
+    }
+  } else if (from === "bottom") {
+    lastTilePosition = pos - (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
+    for (
+      currentPos = lastTilePosition;
+      currentPos < 41;
+      currentPos = currentPos + TILES_FOR_SIDE
+    ) {
+      var prevPosition = currentPos + TILES_FOR_SIDE;
+      updateTilePosition(prevPosition, currentPos);
+    }
+  }
+};
+
+const moveTiles = (insertTilePosition) => {
+  let from = "";
+  if (
+    insertTilePosition === 1 ||
+    insertTilePosition === 3 ||
+    insertTilePosition === 5
+  ) {
+    from = "top";
+  } else if (
+    insertTilePosition === 43 ||
+    insertTilePosition === 45 ||
+    insertTilePosition === 47
+  ) {
+    from = "bottom";
+  }
+  extractComingOutTile(insertTilePosition, from);
+  updateTilesPosition(insertTilePosition, from);
+  setTileToPlayInPosition(insertTilePosition, from);
+  renderBoard();
+  TILE_TO_PLAY_PLACEHOLDER.innerHTML = "";
+  renderTile(tileToPlay, TILE_TO_PLAY_PLACEHOLDER);
+};
