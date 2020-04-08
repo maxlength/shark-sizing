@@ -135,7 +135,7 @@ const blocksTiles = [
   { pos: 13, tile: new Tile("X", "teschio", true, true, true, false) },
   { pos: 12, tile: new Tile("X", "chiavi", false, true, true, true) },
   { pos: 11, tile: new Tile("X", "corona", true, true, false, true) },
-  { pos: 10, tile: new Tile("X", "mMappa", true, true, false, true) },
+  { pos: 10, tile: new Tile("X", "mappa", true, true, false, true) },
   { pos: 3, tile: new Tile("X", "rosso", false, true, true, false) },
   { pos: 2, tile: new Tile("X", "bottino", false, true, true, true) },
   { pos: 1, tile: new Tile("X", "libro", false, true, true, true) },
@@ -262,12 +262,13 @@ window.rotateTile = (tile) => {
 
 window.renderTile = renderTile;
 
-var rotationButton = document.getElementsByClassName("rotationButton")[0];
-rotationButton.addEventListener("click", () => {
-  window.rotateTile(tileToPlay);
-  document.getElementsByClassName("currentTile")[0].innerHTML = "";
-  renderTile(tileToPlay, TILE_TO_PLAY_PLACEHOLDER);
-});
+document
+  .getElementsByClassName("currentTile")[0]
+  .addEventListener("click", () => {
+    window.rotateTile(tileToPlay);
+    document.getElementsByClassName("currentTile")[0].innerHTML = "";
+    renderTile(tileToPlay, TILE_TO_PLAY_PLACEHOLDER);
+  });
 
 const setTileToPlayInPosition = (pos) => {
   board[pos] = previousTileToPlay;
@@ -280,6 +281,10 @@ const extractComingOutTile = (pos, from) => {
     comingOutTilePosition = pos + (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
   } else if (from === "bottom") {
     comingOutTilePosition = pos - (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
+  } else if (from === "left") {
+    comingOutTilePosition = pos + TILES_FOR_SIDE - 1;
+  } else if (from === "right") {
+    comingOutTilePosition = pos - TILES_FOR_SIDE + 1;
   }
   const comingOutTile = board[comingOutTilePosition];
   comingOutTile.isOutOfBoard = true;
@@ -323,6 +328,26 @@ const updateTilesPosition = (pos, from) => {
       var prevPosition = currentPos + TILES_FOR_SIDE;
       updateTilePosition(prevPosition, currentPos);
     }
+  } else if (from === "left") {
+    lastTilePosition = pos + TILES_FOR_SIDE - 1;
+    for (
+      currentPos = lastTilePosition;
+      currentPos > lastTilePosition - TILES_FOR_SIDE;
+      currentPos = currentPos - 1
+    ) {
+      var prevPosition = currentPos - 1;
+      updateTilePosition(prevPosition, currentPos);
+    }
+  } else if (from === "right") {
+    lastTilePosition = pos - TILES_FOR_SIDE + 1;
+    for (
+      currentPos = lastTilePosition;
+      currentPos < lastTilePosition + TILES_FOR_SIDE - 1;
+      currentPos = currentPos + 1
+    ) {
+      var prevPosition = currentPos + 1;
+      updateTilePosition(prevPosition, currentPos);
+    }
   }
 };
 
@@ -340,11 +365,42 @@ const moveTiles = (insertTilePosition) => {
     insertTilePosition === 47
   ) {
     from = "bottom";
+  } else if (
+    insertTilePosition === 7 ||
+    insertTilePosition === 21 ||
+    insertTilePosition === 35
+  ) {
+    from = "left";
+  } else if (
+    insertTilePosition === 13 ||
+    insertTilePosition === 27 ||
+    insertTilePosition === 41
+  ) {
+    from = "right";
   }
   extractComingOutTile(insertTilePosition, from);
   updateTilesPosition(insertTilePosition, from);
-  setTileToPlayInPosition(insertTilePosition, from);
+  setTileToPlayInPosition(insertTilePosition);
   renderBoard();
   TILE_TO_PLAY_PLACEHOLDER.innerHTML = "";
   renderTile(tileToPlay, TILE_TO_PLAY_PLACEHOLDER);
 };
+
+let disabledMovementPosition = -1;
+var movers = document.getElementsByClassName("mover");
+for (var i = 0; i < movers.length; i++) {
+  movers[i].addEventListener("click", (e) => {
+    var position = e.target.dataset.position;
+    if (position !== disabledMovementPosition) {
+      moveTiles(parseInt(position));
+      var disabledMover = document.querySelector(".mover.disabled");
+      if (disabledMover) {
+        disabledMover.classList.remove("disabled");
+      }
+      disabledMovementPosition = e.target.dataset.disablePosition;
+      document
+        .querySelector(`[data-position="${disabledMovementPosition}"]`)
+        .classList.add("disabled");
+    }
+  });
+}

@@ -40,16 +40,79 @@
     /** ===============
 * Mini reset end
 */
+    .boardWrapper {
+      position: relative;
+      margin: 100px auto;
+      width: 700px;
+    }
+    .mover {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background-color: lightblue;
+    }
+    .mover:hover {
+      background-color: lightyellow;
+    }
+    .mover.disabled {
+      cursor: default;
+      opacity: 0;
+    }
+    .mover[data-position="1"],
+    .mover[data-position="3"],
+    .mover[data-position="5"] {
+      top: -100px;
+    }
+    .mover[data-position="43"],
+    .mover[data-position="45"],
+    .mover[data-position="47"] {
+      bottom: -100px;
+    }
+    .mover[data-position="7"],
+    .mover[data-position="21"],
+    .mover[data-position="35"] {
+      left: -100px;
+    }
+    .mover[data-position="13"],
+    .mover[data-position="27"],
+    .mover[data-position="41"] {
+      right: -100px;
+    }
+    .mover[data-position="1"],
+    .mover[data-position="43"] {
+      left: 100px;
+    }
+    .mover[data-position="3"],
+    .mover[data-position="45"] {
+      left: 300px;
+    }
+    .mover[data-position="5"],
+    .mover[data-position="47"] {
+      left: 500px;
+    }
+    .mover[data-position="7"],
+    .mover[data-position="13"] {
+      top: 100px;
+    }
+    .mover[data-position="21"],
+    .mover[data-position="27"] {
+      top: 300px;
+    }
+    .mover[data-position="35"],
+    .mover[data-position="41"] {
+      top: 500px;
+    }
     .board {
       display: flex;
       flex-wrap: wrap;
-      margin: 100px auto;
+      margin: 0 auto;
     }
     .currentTile {
       width: 100px;
       position: fixed;
       top: 100px;
       left: 100px;
+      cursor: pointer;
     }
     .board {
       width: 700px;
@@ -163,8 +226,37 @@
   </style>
 </head>
 <body>
-  <button class="rotationButton">Rotate</button>
   <div class="currentTile"></div>
-  <div class="board"></div>
+  <div class="boardWrapper">
+    <button class="mover" data-position="1" data-disable-position="43"></button>
+    <button class="mover" data-position="3" data-disable-position="45"></button>
+    <button class="mover" data-position="5" data-disable-position="47"></button>
+    <button class="mover" data-position="43" data-disable-position="1"></button>
+    <button class="mover" data-position="45" data-disable-position="3"></button>
+    <button class="mover" data-position="47" data-disable-position="5"></button>
+    <button class="mover" data-position="7" data-disable-position="13"></button>
+    <button
+      class="mover"
+      data-position="21"
+      data-disable-position="27"
+    ></button>
+    <button
+      class="mover"
+      data-position="35"
+      data-disable-position="41"
+    ></button>
+    <button class="mover" data-position="13" data-disable-position="7"></button>
+    <button
+      class="mover"
+      data-position="27"
+      data-disable-position="21"
+    ></button>
+    <button
+      class="mover"
+      data-position="41"
+      data-disable-position="35"
+    ></button>
+    <div class="board"></div>
+  </div>
 </body>
 <script src="/labirinto.js" type="text/javascript"></script>
