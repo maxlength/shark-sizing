@@ -52,6 +52,24 @@ class Tile {
   }
 }
 
+class Player {
+  constructor(color, position) {
+    this.color = color;
+    this.position = position;
+  }
+}
+
+var yellowPlayer = new Player("giallo", 0);
+var redPlayer = new Player("rosso", 6);
+var bluePlayer = new Player("blu", 48);
+var greenPlayer = new Player("verde", 42);
+
+const renderPlayer = (player) => {
+  document
+    .querySelector(`.tile[data-position="${player.position}"]`)
+    .classList.add(player.color, "player");
+};
+
 const TILES_FOR_SIDE = 7;
 const TILE_TO_PLAY_PLACEHOLDER = document.getElementsByClassName(
   "currentTile"
@@ -404,3 +422,8 @@ for (var i = 0; i < movers.length; i++) {
     }
   });
 }
+
+renderPlayer(yellowPlayer);
+renderPlayer(redPlayer);
+renderPlayer(bluePlayer);
+renderPlayer(greenPlayer);
