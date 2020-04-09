@@ -7,7 +7,8 @@ class Tile {
     left = false,
     right = false,
     isOutOfBoard = false,
-    position = -1
+    position = -1,
+    playerOn = ""
   ) {
     this.type = type; // I, T, L, X
     this.treasure = treasure;
@@ -17,6 +18,7 @@ class Tile {
     this.right = right;
     this.isOutOfBoard = isOutOfBoard;
     this.position = position; // 0, 1, 2...
+    this.playerOn = playerOn;
 
     this.orientate();
   }
@@ -56,6 +58,7 @@ class Player {
   constructor(color, position) {
     this.color = color;
     this.position = position;
+    this.previousPosition = position;
   }
 }
 
@@ -63,6 +66,8 @@ var yellowPlayer = new Player("giallo", 0);
 var redPlayer = new Player("rosso", 6);
 var bluePlayer = new Player("blu", 48);
 var greenPlayer = new Player("verde", 42);
+
+const players = [yellowPlayer, redPlayer, bluePlayer, greenPlayer];
 
 const renderPlayer = (player) => {
   document
@@ -136,16 +141,19 @@ let tileToPlay = moveableTiles.splice(randomNumber, 1)[0];
 tileToPlay.isOutOfBoard = true;
 let previousTileToPlay = tileToPlay;
 
-console.log(tileToPlay);
-console.log(moveableTiles.length);
-
 var board = moveableTiles;
 
 const blocksTiles = [
-  { pos: 33, tile: new Tile("X", "blu", true, false, true, false) },
+  {
+    pos: 33,
+    tile: new Tile("X", "blu", true, false, true, false, false, 0, "blu"),
+  },
   { pos: 32, tile: new Tile("X", "elmo", true, false, true, true) },
   { pos: 31, tile: new Tile("X", "candelabro", true, false, true, true) },
-  { pos: 30, tile: new Tile("X", "verde", true, false, false, true) },
+  {
+    pos: 30,
+    tile: new Tile("X", "verde", true, false, false, true, false, 0, "verde"),
+  },
   { pos: 23, tile: new Tile("X", "spada", true, true, true, false) },
   { pos: 22, tile: new Tile("X", "smeraldo", true, true, true, false) },
   { pos: 21, tile: new Tile("X", "tesoro", true, false, true, true) },
@@ -154,10 +162,16 @@ const blocksTiles = [
   { pos: 12, tile: new Tile("X", "chiavi", false, true, true, true) },
   { pos: 11, tile: new Tile("X", "corona", true, true, false, true) },
   { pos: 10, tile: new Tile("X", "mappa", true, true, false, true) },
-  { pos: 3, tile: new Tile("X", "rosso", false, true, true, false) },
+  {
+    pos: 3,
+    tile: new Tile("X", "rosso", false, true, true, false, false, 0, "rosso"),
+  },
   { pos: 2, tile: new Tile("X", "bottino", false, true, true, true) },
   { pos: 1, tile: new Tile("X", "libro", false, true, true, true) },
-  { pos: 0, tile: new Tile("X", "giallo", false, true, false, true) },
+  {
+    pos: 0,
+    tile: new Tile("X", "giallo", false, true, false, true, false, 0, "giallo"),
+  },
 ];
 
 function shuffle(a) {
@@ -177,8 +191,6 @@ for (let i = 0; i < blocksTiles.length; i++) {
 for (let i = 0; i < board.length; i++) {
   board[i].position = i;
 }
-
-console.log(board.length);
 
 var body = document.getElementsByTagName("body")[0];
 
@@ -289,6 +301,8 @@ document
   });
 
 const setTileToPlayInPosition = (pos) => {
+  previousTileToPlay.position = pos;
+  previousTileToPlay.isOutOfBoard = false;
   board[pos] = previousTileToPlay;
   previousTileToPlay = tileToPlay;
 };
@@ -321,6 +335,12 @@ const updateTilePosition = (prevPosition, currentPos) => {
   var emptyTile = new Tile("E");
   emptyTile.position = prevPosition;
   board[currentPos] = tileToMove;
+  if (tileToMove.playerOn !== "") {
+    console.log(tileToMove.position);
+    console.log(tileToMove.playerOn);
+    currentPlayer.previousPosition = currentPlayer.position;
+    currentPlayer.position = tileToMove.position;
+  }
   board[prevPosition] = emptyTile;
 };
 
@@ -350,7 +370,7 @@ const updateTilesPosition = (pos, from) => {
     lastTilePosition = pos + TILES_FOR_SIDE - 1;
     for (
       currentPos = lastTilePosition;
-      currentPos > lastTilePosition - TILES_FOR_SIDE;
+      currentPos > lastTilePosition - TILES_FOR_SIDE + 1;
       currentPos = currentPos - 1
     ) {
       var prevPosition = currentPos - 1;
@@ -400,6 +420,10 @@ const moveTiles = (insertTilePosition) => {
   updateTilesPosition(insertTilePosition, from);
   setTileToPlayInPosition(insertTilePosition);
   renderBoard();
+  renderPlayer(yellowPlayer);
+  renderPlayer(redPlayer);
+  renderPlayer(bluePlayer);
+  renderPlayer(greenPlayer);
   TILE_TO_PLAY_PLACEHOLDER.innerHTML = "";
   renderTile(tileToPlay, TILE_TO_PLAY_PLACEHOLDER);
 };
@@ -422,6 +446,67 @@ for (var i = 0; i < movers.length; i++) {
     }
   });
 }
+
+window.currentPlayer = yellowPlayer;
+
+const canMoveRight = (tileToPosition) => {
+  return (
+    tileToPosition === currentPlayer.position + 1 &&
+    board[currentPlayer.position].right &&
+    board[tileToPosition].left
+  );
+};
+
+const canMoveDown = (tileToPosition) => {
+  return (
+    tileToPosition === currentPlayer.position + 7 &&
+    board[currentPlayer.position].down &&
+    board[tileToPosition].up
+  );
+};
+
+const canMoveLeft = (tileToPosition) => {
+  return (
+    tileToPosition === currentPlayer.position - 1 &&
+    board[currentPlayer.position].left &&
+    board[tileToPosition].right
+  );
+};
+
+const canMoveUp = (tileToPosition) => {
+  return (
+    tileToPosition === currentPlayer.position - 7 &&
+    board[currentPlayer.position].up &&
+    board[tileToPosition].down
+  );
+};
+
+document.getElementsByClassName("board")[0].addEventListener("click", (e) => {
+  var tile;
+  if (e.target.classList.contains("tile")) {
+    tile = e.target;
+  } else {
+    tile = e.target.closest(".tile");
+  }
+  if (tile) {
+    var tileToPosition = parseInt(tile.dataset.position);
+    if (
+      canMoveUp(tileToPosition) ||
+      canMoveDown(tileToPosition) ||
+      canMoveLeft(tileToPosition) ||
+      canMoveRight(tileToPosition)
+    ) {
+      currentPlayer.previousPosition = currentPlayer.position;
+      currentPlayer.position = tileToPosition;
+      document
+        .querySelector(`.player.${currentPlayer.color}`)
+        .classList.remove("player", currentPlayer.color);
+      board[currentPlayer.position].playerOn = currentPlayer.color;
+      board[currentPlayer.previousPosition].playerOn = "";
+      renderPlayer(currentPlayer);
+    }
+  }
+});
 
 renderPlayer(yellowPlayer);
 renderPlayer(redPlayer);
