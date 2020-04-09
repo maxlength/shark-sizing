@@ -8,7 +8,7 @@ class Tile {
     right = false,
     isOutOfBoard = false,
     position = -1,
-    playerOn = ""
+    playersOn = []
   ) {
     this.type = type; // I, T, L, X
     this.treasure = treasure;
@@ -18,7 +18,7 @@ class Tile {
     this.right = right;
     this.isOutOfBoard = isOutOfBoard;
     this.position = position; // 0, 1, 2...
-    this.playerOn = playerOn;
+    this.playersOn = playersOn;
 
     this.orientate();
   }
@@ -146,13 +146,17 @@ var board = moveableTiles;
 const blocksTiles = [
   {
     pos: 33,
-    tile: new Tile("X", "blu", true, false, true, false, false, 0, "blu"),
+    tile: new Tile("X", "blu", true, false, true, false, false, 0, [
+      bluePlayer,
+    ]),
   },
   { pos: 32, tile: new Tile("X", "elmo", true, false, true, true) },
   { pos: 31, tile: new Tile("X", "candelabro", true, false, true, true) },
   {
     pos: 30,
-    tile: new Tile("X", "verde", true, false, false, true, false, 0, "verde"),
+    tile: new Tile("X", "verde", true, false, false, true, false, 0, [
+      greenPlayer,
+    ]),
   },
   { pos: 23, tile: new Tile("X", "spada", true, true, true, false) },
   { pos: 22, tile: new Tile("X", "smeraldo", true, true, true, false) },
@@ -164,13 +168,17 @@ const blocksTiles = [
   { pos: 10, tile: new Tile("X", "mappa", true, true, false, true) },
   {
     pos: 3,
-    tile: new Tile("X", "rosso", false, true, true, false, false, 0, "rosso"),
+    tile: new Tile("X", "rosso", false, true, true, false, false, 0, [
+      redPlayer,
+    ]),
   },
   { pos: 2, tile: new Tile("X", "bottino", false, true, true, true) },
   { pos: 1, tile: new Tile("X", "libro", false, true, true, true) },
   {
     pos: 0,
-    tile: new Tile("X", "giallo", false, true, false, true, false, 0, "giallo"),
+    tile: new Tile("X", "giallo", false, true, false, true, false, 0, [
+      yellowPlayer,
+    ]),
   },
 ];
 
@@ -335,11 +343,14 @@ const updateTilePosition = (prevPosition, currentPos) => {
   var emptyTile = new Tile("E");
   emptyTile.position = prevPosition;
   board[currentPos] = tileToMove;
-  if (tileToMove.playerOn !== "") {
+  var playersOn = tileToMove.playersOn;
+  if (playersOn.length) {
     console.log(tileToMove.position);
-    console.log(tileToMove.playerOn);
-    currentPlayer.previousPosition = currentPlayer.position;
-    currentPlayer.position = tileToMove.position;
+    console.log(playersOn);
+    for (var i = 0; i < playersOn.length; i++) {
+      playersOn[i].previousPosition = playersOn[i].position;
+      playersOn[i].position = tileToMove.position;
+    }
   }
   board[prevPosition] = emptyTile;
 };
@@ -501,8 +512,11 @@ document.getElementsByClassName("board")[0].addEventListener("click", (e) => {
       document
         .querySelector(`.player.${currentPlayer.color}`)
         .classList.remove("player", currentPlayer.color);
-      board[currentPlayer.position].playerOn = currentPlayer.color;
-      board[currentPlayer.previousPosition].playerOn = "";
+      board[currentPlayer.position].playersOn.push(currentPlayer);
+      board[currentPlayer.previousPosition].playersOn.splice(
+        board[currentPlayer.previousPosition].playersOn.indexOf(currentPlayer),
+        1
+      );
       renderPlayer(currentPlayer);
     }
   }
