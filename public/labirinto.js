@@ -13,7 +13,7 @@ class Tile {
     position = -1,
     playersOn = []
   ) {
-    this.type = type; // I, T, L, X
+    this.type = type;
     this.isBlock = isBlock;
     this.treasure = treasure;
     this.up = up;
@@ -21,18 +21,18 @@ class Tile {
     this.left = left;
     this.right = right;
     this.isOutOfBoard = isOutOfBoard;
-    this.position = position; // 0, 1, 2...
+    this.position = position;
     this.playersOn = playersOn;
     this.deg = 0;
 
     if (!this.isBlock) {
-      this.orientate();
+      this.setRandomRotation();
     }
 
     this.setRotationDeg();
   }
 
-  orientate() {
+  setRandomRotation() {
     switch (this.type) {
       case "I":
         this.up = this.down = Boolean(Math.round(Math.random()));
@@ -243,39 +243,18 @@ const buildBoardArray = () => {
 extractRandomTile();
 buildBoardArray();
 
-const hasATreasure = (index, tile) => {
-  return index == 4 && tile.treasure;
-};
-
-const createSubtiles = (tile, tileContainer) => {
-  let subtilesList = document.createElement("UL");
-  subtilesList.classList.add("subtiles");
-
-  for (let i = 0; i < 9; i++) {
-    let subtile = document.createElement("LI");
-    subtile.classList.add("subtile");
-
-    if (hasATreasure(i, tile)) {
-      subtile.classList.add("treasure", tile.treasure);
-    }
-    subtilesList.appendChild(subtile);
-  }
-
-  tileContainer.appendChild(subtilesList);
-};
-
 const renderTile = (tile, containerToAppendTo) => {
   let tileContainer = document.createElement("DIV");
   tileContainer.classList.add("tile");
+  if (tile.treasure) {
+    let treasureContainer = document.createElement("DIV");
+    treasureContainer.classList.add("treasure", tile.treasure);
+    tileContainer.appendChild(treasureContainer);
+  }
+
   tileContainer.dataset["position"] = tile.position;
   tileContainer.dataset["type"] = tile.type;
   tileContainer.dataset["deg"] = tile.deg;
-
-  if (tile.type !== "E") {
-    createSubtiles(tile, tileContainer);
-  } else {
-    tileContainer.classList.add("empty");
-  }
 
   containerToAppendTo.appendChild(tileContainer);
 };

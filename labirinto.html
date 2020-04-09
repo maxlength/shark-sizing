@@ -43,18 +43,21 @@
     .boardWrapper {
       position: relative;
       margin: 100px auto;
-      width: 740px;
+      width: 800px;
       background-color: #1a376f;
-      padding: 20px 0;
+      padding: 50px 0;
     }
     .mover {
       position: absolute;
       width: 100px;
       height: 100px;
-      background-color: lightblue;
     }
-    .mover:hover {
-      background-color: lightyellow;
+    .mover:after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
     }
     .mover.disabled {
       cursor: default;
@@ -63,46 +66,78 @@
     .mover[data-position="1"],
     .mover[data-position="3"],
     .mover[data-position="5"] {
-      top: -100px;
+      top: 0;
+    }
+    .mover[data-position="1"]:after,
+    .mover[data-position="3"]:after,
+    .mover[data-position="5"]:after {
+      border-width: 30px 30px 0 30px;
+      border-color: yellow transparent transparent transparent;
+      top: 0;
+      left: 20px;
     }
     .mover[data-position="43"],
     .mover[data-position="45"],
     .mover[data-position="47"] {
-      bottom: -100px;
+      bottom: 0;
+    }
+    .mover[data-position="43"]:after,
+    .mover[data-position="45"]:after,
+    .mover[data-position="47"]:after {
+      border-width: 0 30px 30px 30px;
+      border-color: transparent transparent yellow transparent;
+      bottom: 0;
+      left: 20px;
     }
     .mover[data-position="7"],
     .mover[data-position="21"],
     .mover[data-position="35"] {
-      left: -100px;
+      left: 0;
+    }
+    .mover[data-position="7"]:after,
+    .mover[data-position="21"]:after,
+    .mover[data-position="35"]:after {
+      border-width: 30px 0 30px 30px;
+      border-color: transparent transparent transparent yellow;
+      top: 20px;
+      left: 0;
     }
     .mover[data-position="13"],
     .mover[data-position="27"],
     .mover[data-position="41"] {
-      right: -100px;
+      right: 0;
+    }
+    .mover[data-position="13"]:after,
+    .mover[data-position="27"]:after,
+    .mover[data-position="41"]:after {
+      border-width: 30px 30px 30px 0;
+      border-color: transparent yellow transparent transparent;
+      top: 20px;
+      right: 0;
     }
     .mover[data-position="1"],
     .mover[data-position="43"] {
-      left: 100px;
+      left: 150px;
     }
     .mover[data-position="3"],
     .mover[data-position="45"] {
-      left: 300px;
+      left: 350px;
     }
     .mover[data-position="5"],
     .mover[data-position="47"] {
-      left: 500px;
+      left: 550px;
     }
     .mover[data-position="7"],
     .mover[data-position="13"] {
-      top: 100px;
+      top: 150px;
     }
     .mover[data-position="21"],
     .mover[data-position="27"] {
-      top: 300px;
+      top: 350px;
     }
     .mover[data-position="35"],
     .mover[data-position="41"] {
-      top: 500px;
+      top: 550px;
     }
     .endTurn {
       position: fixed;
@@ -159,93 +194,95 @@
     .tile[data-type="T"]:before {
       background-image: url("/img/T.png");
     }
-    .subtiles {
-      display: flex;
-      flex-wrap: wrap;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    .subtiles li {
-      flex: 1 0 33.33%;
-      height: 33.33px;
-    }
     .treasure {
       background-size: 100%;
       background-repeat: no-repeat;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50px;
+      height: 50px;
+      transform: translate(-50%, -50%);
     }
 
     .anello {
-      background-image: url("/img/anello.jpg");
+      background-image: url("/img/anello.png");
     }
     .bottino {
-      background-image: url("/img/bottino.jpg");
+      background-image: url("/img/bottino.png");
     }
     .candelabro {
-      background-image: url("/img/candelabro.jpg");
+      background-image: url("/img/candelabro.png");
     }
     .chiavi {
-      background-image: url("/img/chiavi.jpg");
+      background-image: url("/img/chiavi.png");
     }
     .corona {
-      background-image: url("/img/corona.jpg");
+      background-image: url("/img/corona.png");
     }
     .drago {
-      background-image: url("/img/drago.jpg");
+      background-image: url("/img/drago.png");
     }
     .elmo {
-      background-image: url("/img/elmo.jpg");
+      background-image: url("/img/elmo.png");
     }
     .falena {
-      background-image: url("/img/falena.jpg");
+      background-image: url("/img/falena.png");
     }
     .fantasma {
-      background-image: url("/img/fantasma.jpg");
+      background-image: url("/img/fantasma.png");
     }
     .fata {
-      background-image: url("/img/fata.jpg");
+      background-image: url("/img/fata.png");
     }
     .genio {
-      background-image: url("/img/genio.jpg");
+      background-image: url("/img/genio.png");
     }
     .gnomo {
-      background-image: url("/img/gnomo.jpg");
+      background-image: url("/img/gnomo.png");
     }
     .gufo {
-      background-image: url("/img/gufo.jpg");
+      background-image: url("/img/gufo.png");
     }
     .libro {
-      background-image: url("/img/libro.jpg");
+      background-image: url("/img/libro.png");
     }
     .mappa {
-      background-image: url("/img/mappa.jpg");
+      background-image: url("/img/mappa.png");
     }
     .pipistrello {
-      background-image: url("/img/pipistrello.jpg");
+      background-image: url("/img/pipistrello.png");
     }
     .ragno {
-      background-image: url("/img/ragno.jpg");
+      background-image: url("/img/ragno.png");
     }
     .scarabeo {
-      background-image: url("/img/scarabeo.jpg");
+      background-image: url("/img/scarabeo.png");
     }
     .scrigno {
-      background-image: url("/img/scrigno.jpg");
+      background-image: url("/img/scrigno.png");
     }
     .smeraldo {
-      background-image: url("/img/smeraldo.jpg");
+      background-image: url("/img/smeraldo.png");
     }
     .spada {
-      background-image: url("/img/spada.jpg");
+      background-image: url("/img/spada.png");
     }
     .teschio {
-      background-image: url("/img/teschio.jpg");
+      background-image: url("/img/teschio.png");
     }
     .topo {
-      background-image: url("/img/topo.jpg");
+      background-image: url("/img/topo.png");
     }
 
+    .treasure.blu,
+    .treasure.giallo,
+    .treasure.rosso,
+    .treasure.verde {
+      width: 30px;
+      height: 30px;
+      border-radius: 30px;
+    }
     .treasure.blu {
       background-color: darkblue;
     }
