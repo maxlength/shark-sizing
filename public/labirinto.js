@@ -1,3 +1,5 @@
+const TILES_FOR_SIDE = 7;
+
 class Tile {
   constructor(
     type,
@@ -62,29 +64,31 @@ class Player {
   }
 }
 
-var yellowPlayer = new Player("giallo", 0);
-var redPlayer = new Player("rosso", 6);
-var bluePlayer = new Player("blu", 48);
-var greenPlayer = new Player("verde", 42);
-
+const yellowPlayer = new Player("giallo", 0);
+const redPlayer = new Player("rosso", 6);
+const bluePlayer = new Player("blu", 48);
+const greenPlayer = new Player("verde", 42);
 const players = [yellowPlayer, redPlayer, bluePlayer, greenPlayer];
 
-const renderPlayer = (player) => {
-  document
-    .querySelector(`.tile[data-position="${player.position}"]`)
-    .classList.add(player.color, "player");
-};
+let currentPlayerIndex = 0;
+let currentPlayer = players[(currentPlayerIndex = 0)];
 
-const TILES_FOR_SIDE = 7;
-const TILE_TO_PLAY_PLACEHOLDER = document.getElementsByClassName(
-  "currentTile"
-)[0];
+let positionToBeDisabled = -1;
+
+let boardArray;
+let tileToPlay;
+let previousTileToPlay;
+
+// DOM
+const body = document.getElementsByTagName("body")[0];
+const board = document.getElementsByClassName("board")[0];
+const tileToPlayPlaceholder = document.getElementsByClassName("currentTile")[0];
+const movers = document.getElementsByClassName("mover");
+const endTurnButton = document.getElementsByClassName("endTurn")[0];
 
 // 12 tessere I
 // 6 tessere T
 // 16 tessere L
-// 16 tessere bloccate
-// const moveableTiles = [
 const moveableTiles = [
   new Tile("T", "pipistrello"),
   new Tile("T", "fantasma"),
@@ -122,27 +126,7 @@ const moveableTiles = [
   new Tile("L"),
 ];
 
-/**
- * Returns a random integer between min (inclusive) and max (inclusive).
- * The value is no lower than min (or the next integer greater than min
- * if min isn't an integer) and no greater than max (or the next integer
- * lower than max if max isn't an integer).
- * Using Math.round() will give you a non-uniform distribution!
- */
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-// Estrae la prima tessera con cui giocare
-const randomNumber = getRandomInt(0, moveableTiles.length - 1);
-let tileToPlay = moveableTiles.splice(randomNumber, 1)[0];
-tileToPlay.isOutOfBoard = true;
-let previousTileToPlay = tileToPlay;
-
-var board = moveableTiles;
-
+// 16 tessere bloccate X
 const blocksTiles = [
   {
     pos: 33,
@@ -182,82 +166,127 @@ const blocksTiles = [
   },
 ];
 
-function shuffle(a) {
+const getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+const shuffle = (a) => {
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}
+};
 
-shuffle(board);
-// Aggiunge le tessere bloccate
-for (let i = 0; i < blocksTiles.length; i++) {
-  board.splice(blocksTiles[i].pos, 0, blocksTiles[i].tile);
-}
-// Aggiunge position alle tessere
-for (let i = 0; i < board.length; i++) {
-  board[i].position = i;
-}
+const extractRandomTile = () => {
+  const randomNumber = getRandomInt(0, moveableTiles.length - 1);
+  tileToPlay = moveableTiles.splice(randomNumber, 1)[0];
+  tileToPlay.isOutOfBoard = true;
+  previousTileToPlay = tileToPlay;
+};
 
-var body = document.getElementsByTagName("body")[0];
+const buildBoardArray = () => {
+  boardArray = moveableTiles;
 
-function renderTile(tile, ulToAppendTo) {
-  var div = document.createElement("DIV");
-  div.classList.add("tile");
-  div.dataset["position"] = tile.position;
-  div.dataset["type"] = tile.type;
+  shuffle(boardArray);
+
+  // Aggiunge le tessere bloccate
+  for (let i = 0; i < blocksTiles.length; i++) {
+    boardArray.splice(blocksTiles[i].pos, 0, blocksTiles[i].tile);
+  }
+  // Aggiunge position alle tessere
+  for (let i = 0; i < boardArray.length; i++) {
+    boardArray[i].position = i;
+  }
+};
+
+extractRandomTile();
+buildBoardArray();
+
+const isARoad = (index, tile) => {
+  return (
+    index == 4 ||
+    (index == 1 && tile.up) ||
+    (index == 3 && tile.left) ||
+    (index == 5 && tile.right) ||
+    (index == 7 && tile.down)
+  );
+};
+
+const hasATreasure = (index, tile) => {
+  return index == 4 && tile.treasure;
+};
+
+const createSubtiles = (tile, tileContainer) => {
+  let subtilesList = document.createElement("UL");
+  subtilesList.classList.add("subtiles");
+
+  for (let i = 0; i < 9; i++) {
+    let subtile = document.createElement("LI");
+    subtile.classList.add("subtile");
+
+    if (isARoad(i, tile)) {
+      subtile.classList.add("road");
+    }
+    if (hasATreasure(i, tile)) {
+      subtile.classList.add("treasure", tile.treasure);
+    }
+    subtilesList.appendChild(subtile);
+  }
+
+  tileContainer.appendChild(subtilesList);
+};
+
+const renderTile = (tile, containerToAppendTo) => {
+  let tileContainer = document.createElement("DIV");
+  tileContainer.classList.add("tile");
+  tileContainer.dataset["position"] = tile.position;
+  tileContainer.dataset["type"] = tile.type;
+
   if (tile.type !== "E") {
-    var newUl = document.createElement("UL");
-    newUl.classList.add("subtiles");
-    for (let j = 0; j < 9; j++) {
-      var newLi = document.createElement("LI");
-      newLi.classList.add("subtile");
-      if (
-        j == 4 ||
-        (j == 1 && tile.up) ||
-        (j == 3 && tile.left) ||
-        (j == 5 && tile.right) ||
-        (j == 7 && tile.down)
-      ) {
-        newLi.classList.add("road");
-      }
-      if (j == 4 && tile.treasure) {
-        newLi.classList.add("treasure");
-        newLi.classList.add(tile.treasure);
-      }
-      newUl.appendChild(newLi);
-    }
-
-    div.appendChild(newUl);
+    createSubtiles(tile, tileContainer);
   } else {
-    div.classList.add("empty");
+    tileContainer.classList.add("empty");
   }
 
-  ulToAppendTo.appendChild(div);
-}
+  containerToAppendTo.appendChild(tileContainer);
+};
 
-function renderBoard() {
-  var boardDom = document.getElementsByClassName("board")[0];
-  boardDom.innerHTML = "";
-  for (let i = 0; i < board.length; i++) {
-    if (board[i]) {
-      renderTile(board[i], boardDom);
+const renderTileToPlay = () => {
+  tileToPlayPlaceholder.innerHTML = "";
+  renderTile(tileToPlay, tileToPlayPlaceholder);
+};
+
+const renderBoard = () => {
+  board.innerHTML = "";
+  for (let i = 0; i < boardArray.length; i++) {
+    if (boardArray[i]) {
+      renderTile(boardArray[i], board);
     }
   }
-}
+};
 
-renderBoard();
+const renderPlayer = (player) => {
+  document
+    .querySelector(`.tile[data-position="${player.position}"]`)
+    .classList.add(player.color, "player");
+};
 
-renderTile(tileToPlay, TILE_TO_PLAY_PLACEHOLDER);
+const renderPlayers = () => {
+  for (let i = 0; i < players.length; i++) {
+    renderPlayer(players[i]);
+  }
+};
 
-// for (let i = 0; i < board.length; i++) {
-//   console.log(board[i]);
-// }
+const renderElementsGame = () => {
+  renderBoard();
+  renderTileToPlay();
+  renderPlayers();
+};
 
-window.randomTile = tileToPlay;
-
-window.rotateTile = (tile) => {
+const rotateTile = (tile) => {
   switch (tile.type) {
     case "I":
       tile.up = !tile.up;
@@ -298,24 +327,14 @@ window.rotateTile = (tile) => {
   }
 };
 
-window.renderTile = renderTile;
-
-document
-  .getElementsByClassName("currentTile")[0]
-  .addEventListener("click", () => {
-    window.rotateTile(tileToPlay);
-    document.getElementsByClassName("currentTile")[0].innerHTML = "";
-    renderTile(tileToPlay, TILE_TO_PLAY_PLACEHOLDER);
-  });
-
 const setTileToPlayInPosition = (pos) => {
   previousTileToPlay.position = pos;
   previousTileToPlay.isOutOfBoard = false;
-  board[pos] = previousTileToPlay;
+  boardArray[pos] = previousTileToPlay;
   previousTileToPlay = tileToPlay;
 };
 
-const extractComingOutTile = (pos, from) => {
+const extractTileToPlay = (pos, from) => {
   let comingOutTilePosition = -1;
   if (from === "top") {
     comingOutTilePosition = pos + (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
@@ -326,213 +345,224 @@ const extractComingOutTile = (pos, from) => {
   } else if (from === "right") {
     comingOutTilePosition = pos - TILES_FOR_SIDE + 1;
   }
-  const comingOutTile = board[comingOutTilePosition];
+  const comingOutTile = boardArray[comingOutTilePosition];
   comingOutTile.isOutOfBoard = true;
   comingOutTile.position = -1;
 
-  var emptyTile = new Tile("E");
+  const emptyTile = new Tile("E");
   emptyTile.position = comingOutTilePosition;
-  board[comingOutTilePosition] = emptyTile;
+  boardArray[comingOutTilePosition] = emptyTile;
 
   tileToPlay = comingOutTile;
 };
 
 const updateTilePosition = (prevPosition, currentPos) => {
-  var tileToMove = board[prevPosition];
+  const tileToMove = boardArray[prevPosition];
   tileToMove.position = currentPos;
-  var emptyTile = new Tile("E");
+  boardArray[currentPos] = tileToMove;
+
+  const emptyTile = new Tile("E");
   emptyTile.position = prevPosition;
-  board[currentPos] = tileToMove;
-  var playersOn = tileToMove.playersOn;
+  boardArray[prevPosition] = emptyTile;
+
+  const playersOn = tileToMove.playersOn;
   if (playersOn.length) {
-    console.log(tileToMove.position);
-    console.log(playersOn);
-    for (var i = 0; i < playersOn.length; i++) {
+    for (let i = 0; i < playersOn.length; i++) {
       playersOn[i].previousPosition = playersOn[i].position;
       playersOn[i].position = tileToMove.position;
     }
   }
-  board[prevPosition] = emptyTile;
 };
 
-const updateTilesPosition = (pos, from) => {
+const updateBoardTilesPosition = (pos, from) => {
   let lastTilePosition = -1;
-  if (from === "top") {
-    lastTilePosition = pos + (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
-    for (
-      currentPos = lastTilePosition;
-      currentPos > 6;
-      currentPos = currentPos - TILES_FOR_SIDE
-    ) {
-      var prevPosition = currentPos - TILES_FOR_SIDE;
-      updateTilePosition(prevPosition, currentPos);
-    }
-  } else if (from === "bottom") {
-    lastTilePosition = pos - (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
-    for (
-      currentPos = lastTilePosition;
-      currentPos < 41;
-      currentPos = currentPos + TILES_FOR_SIDE
-    ) {
-      var prevPosition = currentPos + TILES_FOR_SIDE;
-      updateTilePosition(prevPosition, currentPos);
-    }
-  } else if (from === "left") {
-    lastTilePosition = pos + TILES_FOR_SIDE - 1;
-    for (
-      currentPos = lastTilePosition;
-      currentPos > lastTilePosition - TILES_FOR_SIDE + 1;
-      currentPos = currentPos - 1
-    ) {
-      var prevPosition = currentPos - 1;
-      updateTilePosition(prevPosition, currentPos);
-    }
-  } else if (from === "right") {
-    lastTilePosition = pos - TILES_FOR_SIDE + 1;
-    for (
-      currentPos = lastTilePosition;
-      currentPos < lastTilePosition + TILES_FOR_SIDE - 1;
-      currentPos = currentPos + 1
-    ) {
-      var prevPosition = currentPos + 1;
-      updateTilePosition(prevPosition, currentPos);
-    }
+  let previousTilePosition;
+
+  switch (from) {
+    case "top":
+      lastTilePosition = pos + (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
+      for (
+        currentTilePosition = lastTilePosition;
+        currentTilePosition > 6;
+        currentTilePosition = currentTilePosition - TILES_FOR_SIDE
+      ) {
+        previousTilePosition = currentTilePosition - TILES_FOR_SIDE;
+        updateTilePosition(previousTilePosition, currentTilePosition);
+      }
+      break;
+    case "bottom":
+      lastTilePosition = pos - (TILES_FOR_SIDE - 1) * TILES_FOR_SIDE;
+      for (
+        currentTilePosition = lastTilePosition;
+        currentTilePosition < 41;
+        currentTilePosition = currentTilePosition + TILES_FOR_SIDE
+      ) {
+        previousTilePosition = currentTilePosition + TILES_FOR_SIDE;
+        updateTilePosition(previousTilePosition, currentTilePosition);
+      }
+      break;
+    case "left":
+      lastTilePosition = pos + TILES_FOR_SIDE - 1;
+      for (
+        currentTilePosition = lastTilePosition;
+        currentTilePosition > lastTilePosition - TILES_FOR_SIDE + 1;
+        currentTilePosition = currentTilePosition - 1
+      ) {
+        previousTilePosition = currentTilePosition - 1;
+        updateTilePosition(previousTilePosition, currentTilePosition);
+      }
+      break;
+    case "right":
+      lastTilePosition = pos - TILES_FOR_SIDE + 1;
+      for (
+        currentTilePosition = lastTilePosition;
+        currentTilePosition < lastTilePosition + TILES_FOR_SIDE - 1;
+        currentTilePosition = currentTilePosition + 1
+      ) {
+        previousTilePosition = currentTilePosition + 1;
+        updateTilePosition(previousTilePosition, currentTilePosition);
+      }
+      break;
   }
+};
+
+const getTileFromMovement = (insertTilePosition) => {
+  let from = "";
+  switch (insertTilePosition) {
+    case 1:
+    case 3:
+    case 5:
+      from = "top";
+      break;
+    case 43:
+    case 45:
+    case 47:
+      from = "bottom";
+      break;
+    case 7:
+    case 21:
+    case 35:
+      from = "left";
+      break;
+    case 13:
+    case 27:
+    case 41:
+      from = "right";
+      break;
+  }
+  return from;
 };
 
 const moveTiles = (insertTilePosition) => {
-  let from = "";
-  if (
-    insertTilePosition === 1 ||
-    insertTilePosition === 3 ||
-    insertTilePosition === 5
-  ) {
-    from = "top";
-  } else if (
-    insertTilePosition === 43 ||
-    insertTilePosition === 45 ||
-    insertTilePosition === 47
-  ) {
-    from = "bottom";
-  } else if (
-    insertTilePosition === 7 ||
-    insertTilePosition === 21 ||
-    insertTilePosition === 35
-  ) {
-    from = "left";
-  } else if (
-    insertTilePosition === 13 ||
-    insertTilePosition === 27 ||
-    insertTilePosition === 41
-  ) {
-    from = "right";
-  }
-  extractComingOutTile(insertTilePosition, from);
-  updateTilesPosition(insertTilePosition, from);
+  let from = getTileFromMovement(insertTilePosition);
+
+  extractTileToPlay(insertTilePosition, from);
+  updateBoardTilesPosition(insertTilePosition, from);
   setTileToPlayInPosition(insertTilePosition);
-  renderBoard();
-  renderPlayer(yellowPlayer);
-  renderPlayer(redPlayer);
-  renderPlayer(bluePlayer);
-  renderPlayer(greenPlayer);
-  TILE_TO_PLAY_PLACEHOLDER.innerHTML = "";
-  renderTile(tileToPlay, TILE_TO_PLAY_PLACEHOLDER);
+
+  renderElementsGame();
 };
 
-let disabledMovementPosition = -1;
-var movers = document.getElementsByClassName("mover");
-for (var i = 0; i < movers.length; i++) {
-  movers[i].addEventListener("click", (e) => {
-    var position = e.target.dataset.position;
-    if (position !== disabledMovementPosition) {
-      moveTiles(parseInt(position));
-      var disabledMover = document.querySelector(".mover.disabled");
-      if (disabledMover) {
-        disabledMover.classList.remove("disabled");
-      }
-      disabledMovementPosition = e.target.dataset.disablePosition;
-      document
-        .querySelector(`[data-position="${disabledMovementPosition}"]`)
-        .classList.add("disabled");
-    }
-  });
-}
+const updateDisabledMovement = (mover) => {
+  let disabledMover = document.querySelector(".mover.disabled");
+  if (disabledMover) {
+    disabledMover.classList.remove("disabled");
+  }
+  positionToBeDisabled = mover.dataset.disablePosition;
+  document
+    .querySelector(`[data-position="${positionToBeDisabled}"]`)
+    .classList.add("disabled");
+};
 
-window.currentPlayerIndex = 0;
-window.currentPlayer = players[(window.currentPlayerIndex = 0)];
-
-const canMoveRight = (tileToPosition) => {
+const canPlayerMoveRight = (tileToPosition) => {
   return (
     tileToPosition === currentPlayer.position + 1 &&
-    board[currentPlayer.position].right &&
-    board[tileToPosition].left
+    boardArray[currentPlayer.position].right &&
+    boardArray[tileToPosition].left
   );
 };
 
-const canMoveDown = (tileToPosition) => {
+const canPlayerMoveDown = (tileToPosition) => {
   return (
     tileToPosition === currentPlayer.position + 7 &&
-    board[currentPlayer.position].down &&
-    board[tileToPosition].up
+    boardArray[currentPlayer.position].down &&
+    boardArray[tileToPosition].up
   );
 };
 
-const canMoveLeft = (tileToPosition) => {
+const canPlayerMoveLeft = (tileToPosition) => {
   return (
     tileToPosition === currentPlayer.position - 1 &&
-    board[currentPlayer.position].left &&
-    board[tileToPosition].right
+    boardArray[currentPlayer.position].left &&
+    boardArray[tileToPosition].right
   );
 };
 
-const canMoveUp = (tileToPosition) => {
+const canPlayerMoveUp = (tileToPosition) => {
   return (
     tileToPosition === currentPlayer.position - 7 &&
-    board[currentPlayer.position].up &&
-    board[tileToPosition].down
+    boardArray[currentPlayer.position].up &&
+    boardArray[tileToPosition].down
   );
 };
 
-document.getElementsByClassName("board")[0].addEventListener("click", (e) => {
-  var tile;
-  if (e.target.classList.contains("tile")) {
-    tile = e.target;
-  } else {
-    tile = e.target.closest(".tile");
-  }
-  if (tile) {
-    var tileToPosition = parseInt(tile.dataset.position);
-    if (
-      canMoveUp(tileToPosition) ||
-      canMoveDown(tileToPosition) ||
-      canMoveLeft(tileToPosition) ||
-      canMoveRight(tileToPosition)
-    ) {
+const canPlayerGoToTile = (tileToPosition) => {
+  return (
+    canPlayerMoveUp(tileToPosition) ||
+    canPlayerMoveDown(tileToPosition) ||
+    canPlayerMoveLeft(tileToPosition) ||
+    canPlayerMoveRight(tileToPosition)
+  );
+};
+
+// EVENTS
+
+tileToPlayPlaceholder.addEventListener("click", () => {
+  rotateTile(tileToPlay);
+  renderTileToPlay();
+});
+
+board.addEventListener("click", (e) => {
+  const tileTo = e.target.classList.contains("tile")
+    ? e.target
+    : e.target.closest(".tile");
+  if (tileTo) {
+    const tileToPosition = parseInt(tileTo.dataset.position);
+    if (canPlayerGoToTile(tileToPosition)) {
       currentPlayer.previousPosition = currentPlayer.position;
       currentPlayer.position = tileToPosition;
       document
         .querySelector(`.player.${currentPlayer.color}`)
         .classList.remove("player", currentPlayer.color);
-      board[currentPlayer.position].playersOn.push(currentPlayer);
-      board[currentPlayer.previousPosition].playersOn.splice(
-        board[currentPlayer.previousPosition].playersOn.indexOf(currentPlayer),
-        1
-      );
+
+      boardArray[currentPlayer.position].playersOn.push(currentPlayer);
+
+      let prevTilePlayers =
+        boardArray[currentPlayer.previousPosition].playersOn;
+      prevTilePlayers.splice(prevTilePlayers.indexOf(currentPlayer), 1);
+
       renderPlayer(currentPlayer);
     }
   }
 });
 
-renderPlayer(yellowPlayer);
-renderPlayer(redPlayer);
-renderPlayer(bluePlayer);
-renderPlayer(greenPlayer);
+for (let i = 0; i < movers.length; i++) {
+  movers[i].addEventListener("click", (e) => {
+    const position = e.target.dataset.position;
+    if (position !== positionToBeDisabled) {
+      moveTiles(parseInt(position));
+      updateDisabledMovement(e.target);
+    }
+  });
+}
 
-document.getElementsByClassName("endTurn")[0].addEventListener("click", () => {
-  if (window.currentPlayerIndex < players.length - 1) {
-    window.currentPlayerIndex++;
+endTurnButton.addEventListener("click", () => {
+  if (currentPlayerIndex < players.length - 1) {
+    currentPlayerIndex++;
   } else {
-    window.currentPlayerIndex = 0;
+    currentPlayerIndex = 0;
   }
-  window.currentPlayer = players[window.currentPlayerIndex];
+  currentPlayer = players[currentPlayerIndex];
 });
+
+renderElementsGame();
