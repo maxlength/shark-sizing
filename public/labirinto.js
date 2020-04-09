@@ -3,6 +3,7 @@ const TILES_FOR_SIDE = 7;
 class Tile {
   constructor(
     type,
+    isBlock = false,
     treasure = null,
     up = false,
     down = false,
@@ -13,6 +14,7 @@ class Tile {
     playersOn = []
   ) {
     this.type = type; // I, T, L, X
+    this.isBlock = isBlock;
     this.treasure = treasure;
     this.up = up;
     this.down = down;
@@ -21,8 +23,13 @@ class Tile {
     this.isOutOfBoard = isOutOfBoard;
     this.position = position; // 0, 1, 2...
     this.playersOn = playersOn;
+    this.deg = 0;
 
-    this.orientate();
+    if (!this.isBlock) {
+      this.orientate();
+    }
+
+    this.setRotationDeg();
   }
 
   orientate() {
@@ -54,6 +61,36 @@ class Tile {
         break;
     }
   }
+
+  setRotationDeg() {
+    switch (this.type) {
+      case "I":
+        this.deg = this.up ? "0" : "90";
+        break;
+      case "L":
+        if (this.up && this.right) {
+          this.deg = "0";
+        } else if (this.right && this.down) {
+          this.deg = "90";
+        } else if (this.down && this.left) {
+          this.deg = "180";
+        } else {
+          this.deg = "270";
+        }
+        break;
+      case "T":
+        if (this.left && this.right && this.down) {
+          this.deg = "0";
+        } else if (this.up && this.down && this.left) {
+          this.deg = "90";
+        } else if (this.left && this.up && this.right) {
+          this.deg = "180";
+        } else {
+          this.deg = "270";
+        }
+        break;
+    }
+  }
 }
 
 class Player {
@@ -61,6 +98,7 @@ class Player {
     this.color = color;
     this.position = position;
     this.previousPosition = position;
+    this.hasMovedTile = false;
   }
 }
 
@@ -90,12 +128,12 @@ const endTurnButton = document.getElementsByClassName("endTurn")[0];
 // 6 tessere T
 // 16 tessere L
 const moveableTiles = [
-  new Tile("T", "pipistrello"),
-  new Tile("T", "fantasma"),
-  new Tile("T", "genio"),
-  new Tile("T", "gnomo"),
-  new Tile("T", "drago"),
-  new Tile("T", "fata"),
+  new Tile("T", false, "pipistrello"),
+  new Tile("T", false, "fantasma"),
+  new Tile("T", false, "genio"),
+  new Tile("T", false, "gnomo"),
+  new Tile("T", false, "drago"),
+  new Tile("T", false, "fata"),
   new Tile("I"),
   new Tile("I"),
   new Tile("I"),
@@ -108,12 +146,12 @@ const moveableTiles = [
   new Tile("I"),
   new Tile("I"),
   new Tile("I"),
-  new Tile("L", "topo"),
-  new Tile("L", "ragno"),
-  new Tile("L", "lucertola"),
-  new Tile("L", "gufo"),
-  new Tile("L", "scarabeo"),
-  new Tile("L", "falena"),
+  new Tile("L", false, "topo"),
+  new Tile("L", false, "ragno"),
+  new Tile("L", false, "lucertola"),
+  new Tile("L", false, "gufo"),
+  new Tile("L", false, "scarabeo"),
+  new Tile("L", false, "falena"),
   new Tile("L"),
   new Tile("L"),
   new Tile("L"),
@@ -130,37 +168,37 @@ const moveableTiles = [
 const blocksTiles = [
   {
     pos: 33,
-    tile: new Tile("X", "blu", true, false, true, false, false, 0, [
+    tile: new Tile("L", true, "blu", true, false, true, false, false, 0, [
       bluePlayer,
     ]),
   },
-  { pos: 32, tile: new Tile("X", "elmo", true, false, true, true) },
-  { pos: 31, tile: new Tile("X", "candelabro", true, false, true, true) },
+  { pos: 32, tile: new Tile("T", true, "elmo", true, false, true, true) },
+  { pos: 31, tile: new Tile("T", true, "candelabro", true, false, true, true) },
   {
     pos: 30,
-    tile: new Tile("X", "verde", true, false, false, true, false, 0, [
+    tile: new Tile("L", true, "verde", true, false, false, true, false, 0, [
       greenPlayer,
     ]),
   },
-  { pos: 23, tile: new Tile("X", "spada", true, true, true, false) },
-  { pos: 22, tile: new Tile("X", "smeraldo", true, true, true, false) },
-  { pos: 21, tile: new Tile("X", "tesoro", true, false, true, true) },
-  { pos: 20, tile: new Tile("X", "anello", true, true, false, true) },
-  { pos: 13, tile: new Tile("X", "teschio", true, true, true, false) },
-  { pos: 12, tile: new Tile("X", "chiavi", false, true, true, true) },
-  { pos: 11, tile: new Tile("X", "corona", true, true, false, true) },
-  { pos: 10, tile: new Tile("X", "mappa", true, true, false, true) },
+  { pos: 23, tile: new Tile("T", true, "spada", true, true, true, false) },
+  { pos: 22, tile: new Tile("T", true, "smeraldo", true, true, true, false) },
+  { pos: 21, tile: new Tile("T", true, "scrigno", true, false, true, true) },
+  { pos: 20, tile: new Tile("T", true, "anello", true, true, false, true) },
+  { pos: 13, tile: new Tile("T", true, "teschio", true, true, true, false) },
+  { pos: 12, tile: new Tile("T", true, "chiavi", false, true, true, true) },
+  { pos: 11, tile: new Tile("T", true, "corona", true, true, false, true) },
+  { pos: 10, tile: new Tile("T", true, "mappa", true, true, false, true) },
   {
     pos: 3,
-    tile: new Tile("X", "rosso", false, true, true, false, false, 0, [
+    tile: new Tile("L", true, "rosso", false, true, true, false, false, 0, [
       redPlayer,
     ]),
   },
-  { pos: 2, tile: new Tile("X", "bottino", false, true, true, true) },
-  { pos: 1, tile: new Tile("X", "libro", false, true, true, true) },
+  { pos: 2, tile: new Tile("T", true, "bottino", false, true, true, true) },
+  { pos: 1, tile: new Tile("T", true, "libro", false, true, true, true) },
   {
     pos: 0,
-    tile: new Tile("X", "giallo", false, true, false, true, false, 0, [
+    tile: new Tile("L", true, "giallo", false, true, false, true, false, 0, [
       yellowPlayer,
     ]),
   },
@@ -205,16 +243,6 @@ const buildBoardArray = () => {
 extractRandomTile();
 buildBoardArray();
 
-const isARoad = (index, tile) => {
-  return (
-    index == 4 ||
-    (index == 1 && tile.up) ||
-    (index == 3 && tile.left) ||
-    (index == 5 && tile.right) ||
-    (index == 7 && tile.down)
-  );
-};
-
 const hasATreasure = (index, tile) => {
   return index == 4 && tile.treasure;
 };
@@ -227,9 +255,6 @@ const createSubtiles = (tile, tileContainer) => {
     let subtile = document.createElement("LI");
     subtile.classList.add("subtile");
 
-    if (isARoad(i, tile)) {
-      subtile.classList.add("road");
-    }
     if (hasATreasure(i, tile)) {
       subtile.classList.add("treasure", tile.treasure);
     }
@@ -244,6 +269,7 @@ const renderTile = (tile, containerToAppendTo) => {
   tileContainer.classList.add("tile");
   tileContainer.dataset["position"] = tile.position;
   tileContainer.dataset["type"] = tile.type;
+  tileContainer.dataset["deg"] = tile.deg;
 
   if (tile.type !== "E") {
     createSubtiles(tile, tileContainer);
@@ -519,10 +545,12 @@ const canPlayerGoToTile = (tileToPosition) => {
 
 tileToPlayPlaceholder.addEventListener("click", () => {
   rotateTile(tileToPlay);
+  tileToPlay.setRotationDeg();
   renderTileToPlay();
 });
 
 board.addEventListener("click", (e) => {
+  if (!currentPlayer.hasMovedTile) return;
   const tileTo = e.target.classList.contains("tile")
     ? e.target
     : e.target.closest(".tile");
@@ -548,15 +576,18 @@ board.addEventListener("click", (e) => {
 
 for (let i = 0; i < movers.length; i++) {
   movers[i].addEventListener("click", (e) => {
+    if (currentPlayer.hasMovedTile) return;
     const position = e.target.dataset.position;
     if (position !== positionToBeDisabled) {
       moveTiles(parseInt(position));
       updateDisabledMovement(e.target);
+      currentPlayer.hasMovedTile = true;
     }
   });
 }
 
 endTurnButton.addEventListener("click", () => {
+  if (!currentPlayer.hasMovedTile) return;
   if (currentPlayerIndex < players.length - 1) {
     currentPlayerIndex++;
   } else {
