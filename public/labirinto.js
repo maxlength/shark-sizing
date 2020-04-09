@@ -458,12 +458,23 @@ const getTileFromMovement = (insertTilePosition) => {
   return from;
 };
 
+const updatePlayerOutOfBoardPosition = (insertTilePosition) => {
+  if (tileToPlay.playersOn.length) {
+    for (let i = 0; i < tileToPlay.playersOn.length; i++) {
+      tileToPlay.playersOn[i].position = insertTilePosition;
+    }
+    previousTileToPlay.playersOn = [];
+    tileToPlay.playersOn = [];
+  }
+};
+
 const moveTiles = (insertTilePosition) => {
   let from = getTileFromMovement(insertTilePosition);
 
   extractTileToPlay(insertTilePosition, from);
   updateBoardTilesPosition(insertTilePosition, from);
   setTileToPlayInPosition(insertTilePosition);
+  updatePlayerOutOfBoardPosition(insertTilePosition);
 
   renderElementsGame();
 };
@@ -567,6 +578,7 @@ for (let i = 0; i < movers.length; i++) {
 
 endTurnButton.addEventListener("click", () => {
   if (!currentPlayer.hasMovedTile) return;
+  currentPlayer.hasMovedTile = false;
   if (currentPlayerIndex < players.length - 1) {
     currentPlayerIndex++;
   } else {
