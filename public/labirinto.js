@@ -458,7 +458,8 @@ for (var i = 0; i < movers.length; i++) {
   });
 }
 
-window.currentPlayer = yellowPlayer;
+window.currentPlayerIndex = 0;
+window.currentPlayer = players[(window.currentPlayerIndex = 0)];
 
 const canMoveRight = (tileToPosition) => {
   return (
@@ -526,3 +527,12 @@ renderPlayer(yellowPlayer);
 renderPlayer(redPlayer);
 renderPlayer(bluePlayer);
 renderPlayer(greenPlayer);
+
+document.getElementsByClassName("endTurn")[0].addEventListener("click", () => {
+  if (window.currentPlayerIndex < players.length - 1) {
+    window.currentPlayerIndex++;
+  } else {
+    window.currentPlayerIndex = 0;
+  }
+  window.currentPlayer = players[window.currentPlayerIndex];
+});
