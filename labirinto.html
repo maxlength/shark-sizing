@@ -313,7 +313,10 @@
     .treasure.verde {
       background-color: darkgreen;
     }
-    .player:after {
+    .player-giallo:after,
+    .player-rosso:after,
+    .player-blu:after,
+    .player-verde:after {
       content: "";
       position: absolute;
       top: 33.33px;
@@ -323,24 +326,24 @@
       border-radius: 33.33px;
       border: 2px solid black;
       z-index: 1;
-      opacity: 0.5;
+      opacity: 0.3;
     }
-    body.giallo .player.giallo:after,
-    body.rosso .player.rosso:after,
-    body.blu .player.blu:after,
-    body.verde .player.verde:after {
+    body.giallo .player-giallo:after,
+    body.rosso .player-rosso:after,
+    body.blu .player-blu:after,
+    body.verde .player-verde:after {
       opacity: 1;
     }
-    .player.giallo:after {
+    .player-giallo:after {
       background-color: yellow;
     }
-    .player.rosso:after {
+    .player-rosso:after {
       background-color: darkred;
     }
-    .player.blu:after {
+    .player-blu:after {
       background-color: darkblue;
     }
-    .player.verde:after {
+    .player-verde:after {
       background-color: darkgreen;
     }
   </style>

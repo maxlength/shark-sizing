@@ -277,9 +277,22 @@ const renderBoard = () => {
 };
 
 const renderPlayer = (player) => {
-  document
-    .querySelector(`.tile[data-position="${player.position}"]`)
-    .classList.add(player.color, "player");
+  const tileWherePlayerIs = document.querySelector(
+    `.tile[data-position="${player.position}"]`
+  );
+  const tileWherePlayerWas = document.querySelector(
+    `.tile[data-position="${player.previousPosition}"]`
+  );
+
+  if (boardArray[player.position].playersOn.length > 1) {
+    tileWherePlayerIs.classList.add("morePlayers");
+  }
+
+  if (boardArray[player.previousPosition].playersOn.length < 2) {
+    tileWherePlayerWas.classList.remove("morePlayers");
+  }
+
+  tileWherePlayerIs.classList.add(`player-${player.color}`);
 };
 
 const renderPlayers = () => {
@@ -470,6 +483,7 @@ const updatePlayerOutOfBoardPosition = (insertTilePosition) => {
   if (tileToPlay.playersOn.length) {
     for (let i = 0; i < tileToPlay.playersOn.length; i++) {
       tileToPlay.playersOn[i].position = insertTilePosition;
+      boardArray[insertTilePosition].playersOn.push(tileToPlay.playersOn[i]);
     }
     previousTileToPlay.playersOn = [];
     tileToPlay.playersOn = [];
@@ -557,9 +571,11 @@ board.addEventListener("click", (e) => {
     if (canPlayerGoToTile(tileToPosition)) {
       currentPlayer.previousPosition = currentPlayer.position;
       currentPlayer.position = tileToPosition;
-      document
-        .querySelector(`.player.${currentPlayer.color}`)
-        .classList.remove("player", currentPlayer.color);
+
+      let tileWherePlayerWas = document.querySelector(
+        `.player-${currentPlayer.color}`
+      );
+      tileWherePlayerWas.classList.remove(`player-${currentPlayer.color}`);
 
       boardArray[currentPlayer.position].playersOn.push(currentPlayer);
 
