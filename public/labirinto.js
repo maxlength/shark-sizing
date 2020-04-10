@@ -119,6 +119,9 @@ let previousTileToPlay;
 
 // DOM
 const body = document.getElementsByTagName("body")[0];
+const currentPlayerContainer = document.getElementsByClassName(
+  "currentPlayer"
+)[0];
 const board = document.getElementsByClassName("board")[0];
 const tileToPlayPlaceholder = document.getElementsByClassName("currentTile")[0];
 const movers = document.getElementsByClassName("mover");
@@ -283,6 +286,11 @@ const renderPlayers = () => {
   for (let i = 0; i < players.length; i++) {
     renderPlayer(players[i]);
   }
+};
+
+const renderCurrentPlayer = () => {
+  currentPlayerContainer.innerHTML = currentPlayer.color;
+  body.classList = [currentPlayer.color];
 };
 
 const renderElementsGame = () => {
@@ -585,6 +593,8 @@ endTurnButton.addEventListener("click", () => {
     currentPlayerIndex = 0;
   }
   currentPlayer = players[currentPlayerIndex];
+  renderCurrentPlayer();
 });
 
 renderElementsGame();
+renderCurrentPlayer();
