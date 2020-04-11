@@ -171,6 +171,9 @@ const board = document.getElementsByClassName("board")[0];
 const tileToPlayPlaceholder = document.getElementsByClassName("currentTile")[0];
 const movers = document.getElementsByClassName("mover");
 const treasureToFind = document.getElementsByClassName("currentTreasure")[0];
+const playersTreasuresStatus = document.getElementsByClassName(
+  "playersTreasuresStatus"
+)[0];
 const endTurnButton = document.getElementsByClassName("endTurn")[0];
 
 // 12 tessere I
@@ -337,19 +340,39 @@ const renderTreasureToFind = (player) => {
   }
 };
 
+const renderPlayersTreasuresStatus = () => {
+  let ul = playersTreasuresStatus.getElementsByTagName("ul")[0];
+  ul.innerHTML = "";
+  for (let i = 0; i < players.length; i++) {
+    let li = document.createElement("LI");
+    let leftCardLabel =
+      players[i].cards.length === 1 ? "  carta rimanente" : " carte rimanenti";
+    li.innerText =
+      players[i].color + ": " + players[i].cards.length + " carte rimanenti";
+    ul.appendChild(li);
+  }
+};
+
+const renderPlayerFoundTreasureMessage = (player) => {
+  alert(player.color + " ha trovato: " + player.currentCardToFind.treasure);
+};
+
 const playerOnTreasure = (player, currentTile) => {
   if (
     player.currentCardToFind &&
     player.currentCardToFind.treasure === currentTile.treasure
   ) {
-    console.log("You founded: " + currentTile.treasure);
+    renderPlayerFoundTreasureMessage(player);
     player.cards.splice(player.cards.indexOf(player.currentCardToFind), 1);
     player.currentCardToFind = player.cards[0];
     if (player.currentCardToFind === undefined) {
       console.log("Come back to home!");
     } else {
-      renderTreasureToFind(player);
+      renderTreasureToFind(yourPlayer);
     }
+
+    renderPlayersTreasuresStatus();
+
     endTurnButton.click();
   }
 };
@@ -404,6 +427,7 @@ const renderElementsGame = () => {
   renderTileToPlay();
   renderPlayers();
   renderTreasureToFind(yourPlayer);
+  renderPlayersTreasuresStatus();
 };
 
 const rotateTile = (tile) => {

@@ -1,0 +1,385 @@
+/**
+ * Mini Reset
+ *=============*/
+html {
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body,
+ol,
+ul,
+li,
+a,
+button {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+a {
+  text-decoration: underline;
+}
+
+button {
+  -webkit-appearance: button;
+  background-color: transparent;
+  display: block;
+  cursor: pointer;
+}
+
+/** ===============
+* Mini reset end
+*/
+body {
+  display: flex;
+  flex-wrap: wrap;
+}
+.boardWrapper {
+  position: relative;
+  margin: 100px auto;
+  width: 800px;
+  background-color: #1a376f;
+  background: radial-gradient(
+    circle,
+    rgba(43, 31, 71, 1) 0%,
+    rgba(26, 55, 111, 1) 100%
+  );
+  padding: 50px 0;
+  border-radius: 10px;
+}
+.fixedPanel {
+  display: flex;
+  flex-wrap: wrap;
+  flex-flow: column;
+  align-items: center;
+  text-align: center;
+  margin: 100px;
+}
+.currentPlayer {
+  font-size: 30px;
+  text-transform: uppercase;
+  margin-top: 0;
+}
+.currentTile {
+  width: 100px;
+  cursor: pointer;
+}
+.playersTreasuresStatus li {
+  text-align: left;
+}
+.endTurn {
+  background-color: #1a376f;
+  color: white;
+  padding: 5px;
+  margin-top: 50px;
+}
+.mover {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+}
+.mover:after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+.mover.disabled {
+  cursor: default;
+  opacity: 0;
+}
+.mover[data-position="1"],
+.mover[data-position="3"],
+.mover[data-position="5"] {
+  top: 0;
+}
+.mover[data-position="1"]:after,
+.mover[data-position="3"]:after,
+.mover[data-position="5"]:after {
+  border-width: 30px 30px 0 30px;
+  border-color: yellow transparent transparent transparent;
+  top: 0;
+  left: 20px;
+}
+.mover[data-position="43"],
+.mover[data-position="45"],
+.mover[data-position="47"] {
+  bottom: 0;
+}
+.mover[data-position="43"]:after,
+.mover[data-position="45"]:after,
+.mover[data-position="47"]:after {
+  border-width: 0 30px 30px 30px;
+  border-color: transparent transparent yellow transparent;
+  bottom: 0;
+  left: 20px;
+}
+.mover[data-position="7"],
+.mover[data-position="21"],
+.mover[data-position="35"] {
+  left: 0;
+}
+.mover[data-position="7"]:after,
+.mover[data-position="21"]:after,
+.mover[data-position="35"]:after {
+  border-width: 30px 0 30px 30px;
+  border-color: transparent transparent transparent yellow;
+  top: 20px;
+  left: 0;
+}
+.mover[data-position="13"],
+.mover[data-position="27"],
+.mover[data-position="41"] {
+  right: 0;
+}
+.mover[data-position="13"]:after,
+.mover[data-position="27"]:after,
+.mover[data-position="41"]:after {
+  border-width: 30px 30px 30px 0;
+  border-color: transparent yellow transparent transparent;
+  top: 20px;
+  right: 0;
+}
+.mover[data-position="1"],
+.mover[data-position="43"] {
+  left: 150px;
+}
+.mover[data-position="3"],
+.mover[data-position="45"] {
+  left: 350px;
+}
+.mover[data-position="5"],
+.mover[data-position="47"] {
+  left: 550px;
+}
+.mover[data-position="7"],
+.mover[data-position="13"] {
+  top: 150px;
+}
+.mover[data-position="21"],
+.mover[data-position="27"] {
+  top: 350px;
+}
+.mover[data-position="35"],
+.mover[data-position="41"] {
+  top: 550px;
+}
+
+.board {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 auto;
+}
+
+.board {
+  width: 700px;
+}
+.tile {
+  position: relative;
+  flex: 1 0 100px;
+  height: 100px;
+}
+.tile:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: 100%;
+}
+.tile[data-deg="90"]:before {
+  transform: rotate(90deg);
+}
+.tile[data-deg="180"]:before {
+  transform: rotate(180deg);
+}
+.tile[data-deg="270"]:before {
+  transform: rotate(270deg);
+}
+.tile[data-type="L"]:before {
+  background-image: url("/img/L.png");
+}
+.tile[data-type="I"]:before {
+  background-image: url("/img/I.png");
+}
+.tile[data-type="T"]:before {
+  background-image: url("/img/T.png");
+}
+.treasure {
+  background-size: 100%;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  transform: translate(-50%, -50%);
+}
+
+.anello {
+  background-image: url("/img/anello.png");
+}
+.bottino {
+  background-image: url("/img/bottino.png");
+}
+.candelabro {
+  background-image: url("/img/candelabro.png");
+}
+.chiavi {
+  background-image: url("/img/chiavi.png");
+}
+.corona {
+  background-image: url("/img/corona.png");
+}
+.drago {
+  background-image: url("/img/drago.png");
+}
+.elmo {
+  background-image: url("/img/elmo.png");
+}
+.falena {
+  background-image: url("/img/falena.png");
+}
+.fantasma {
+  background-image: url("/img/fantasma.png");
+}
+.fata {
+  background-image: url("/img/fata.png");
+}
+.genio {
+  background-image: url("/img/genio.png");
+}
+.gnomo {
+  background-image: url("/img/gnomo.png");
+}
+.gufo {
+  background-image: url("/img/gufo.png");
+}
+.libro {
+  background-image: url("/img/libro.png");
+}
+.mappa {
+  background-image: url("/img/mappa.png");
+}
+.pipistrello {
+  background-image: url("/img/pipistrello.png");
+}
+.ragno {
+  background-image: url("/img/ragno.png");
+}
+.scarabeo {
+  background-image: url("/img/scarabeo.png");
+}
+.scrigno {
+  background-image: url("/img/scrigno.png");
+}
+.smeraldo {
+  background-image: url("/img/smeraldo.png");
+}
+.spada {
+  background-image: url("/img/spada.png");
+}
+.teschio {
+  background-image: url("/img/teschio.png");
+}
+.topo {
+  background-image: url("/img/topo.png");
+}
+.currentTreasure {
+  position: relative;
+}
+.treasureCard {
+  width: 100px;
+  height: 150px;
+  border: 2px solid chocolate;
+  border-radius: 5px;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: center;
+  background-color: lightyellow;
+}
+
+.hiddenTreasureCard {
+  border: 2px solid white;
+  background-color: #1a376f;
+  position: absolute;
+  top: 0;
+  left: 20px;
+  z-index: -1;
+}
+
+.treasure.blu,
+.treasure.giallo,
+.treasure.rosso,
+.treasure.verde {
+  width: 30px;
+  height: 30px;
+  border-radius: 30px;
+}
+.treasure.blu {
+  background-color: darkblue;
+}
+.treasure.giallo {
+  background-color: yellow;
+}
+.treasure.rosso {
+  background-color: darkred;
+}
+.treasure.verde {
+  background-color: darkgreen;
+}
+.player-giallo:after,
+.player-rosso:after,
+.player-blu:after,
+.player-verde:after {
+  content: "";
+  position: absolute;
+  top: 33.33px;
+  left: 33.33px;
+  width: 33.33px;
+  height: 33.33px;
+  border-radius: 33.33px;
+  border: 2px solid black;
+  z-index: 1;
+  opacity: 0.3;
+}
+body.giallo .player-giallo:after,
+body.rosso .player-rosso:after,
+body.blu .player-blu:after,
+body.verde .player-verde:after {
+  opacity: 1;
+}
+.player-giallo:after {
+  background-color: yellow;
+}
+.player-rosso:after {
+  background-color: darkred;
+}
+.player-blu:after {
+  background-color: darkblue;
+}
+.player-verde:after {
+  background-color: darkgreen;
+}
+.morePlayers .player-giallo:after {
+  transform: translate(-50%, -50%);
+}
+.morePlayers .player-rosso:after {
+  transform: translate(50%, -50%);
+}
+.morePlayers .player-blu:after {
+  transform: translate(50%, 50%);
+}
+.morePlayers .player-verde:after {
+  transform: translate(-50%, 50%);
+}
