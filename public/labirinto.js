@@ -94,22 +94,67 @@ class Tile {
 }
 
 class Player {
-  constructor(color, position) {
+  constructor(color, position, cards = []) {
     this.color = color;
     this.position = position;
     this.previousPosition = position;
     this.hasMovedTile = false;
+    this.cards = cards;
+    this.currentCardToFind = cards[0];
   }
 }
 
-const yellowPlayer = new Player("giallo", 0);
-const redPlayer = new Player("rosso", 6);
-const bluePlayer = new Player("blu", 48);
-const greenPlayer = new Player("verde", 42);
+class Card {
+  constructor(treasure) {
+    this.treasure = treasure;
+  }
+}
+
+const cards = [
+  new Card("anello"),
+  new Card("bottino"),
+  new Card("candelabro"),
+  new Card("chiavi"),
+  new Card("corona"),
+  new Card("drago"),
+  new Card("elmo"),
+  new Card("falena"),
+  new Card("fantasma"),
+  new Card("fata"),
+  new Card("genio"),
+  new Card("gnomo"),
+  new Card("gufo"),
+  new Card("libro"),
+  new Card("mappa"),
+  new Card("pipistrello"),
+  new Card("ragno"),
+  new Card("scarabeo"),
+  new Card("scrigno"),
+  new Card("smeraldo"),
+  new Card("spada"),
+  new Card("teschio"),
+  new Card("topo"),
+];
+
+const shuffle = (a) => {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+shuffle(cards);
+
+const yellowPlayer = new Player("giallo", 0, [cards[0], cards[1], cards[2]]);
+const redPlayer = new Player("rosso", 6, [cards[3], cards[4], cards[5]]);
+const bluePlayer = new Player("blu", 48, [cards[6], cards[7], cards[8]]);
+const greenPlayer = new Player("verde", 42, [cards[9], cards[10], cards[22]]);
 const players = [yellowPlayer, redPlayer, bluePlayer, greenPlayer];
 
 let currentPlayerIndex = 0;
 let currentPlayer = players[(currentPlayerIndex = 0)];
+const yourPlayer = yellowPlayer;
 
 let positionToBeDisabled = -1;
 
@@ -125,6 +170,7 @@ const currentPlayerContainer = document.getElementsByClassName(
 const board = document.getElementsByClassName("board")[0];
 const tileToPlayPlaceholder = document.getElementsByClassName("currentTile")[0];
 const movers = document.getElementsByClassName("mover");
+const treasureToFind = document.getElementsByClassName("currentTreasure")[0];
 const endTurnButton = document.getElementsByClassName("endTurn")[0];
 
 // 12 tessere I
@@ -213,14 +259,6 @@ const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-const shuffle = (a) => {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
-
 const extractRandomTile = () => {
   const randomNumber = getRandomInt(0, moveableTiles.length - 1);
   tileToPlay = moveableTiles.splice(randomNumber, 1)[0];
@@ -276,6 +314,54 @@ const renderBoard = () => {
   }
 };
 
+const renderTreasureToFind = (player) => {
+  if (player.currentCardToFind) {
+    treasureToFind.innerHTML = "";
+    const treasureDom = document.createElement("DIV");
+    treasureDom.classList.add(
+      "treasureCard",
+      player.currentCardToFind.treasure
+    );
+    treasureToFind.appendChild(treasureDom);
+    let leftPos = 20;
+    let zIndex = -1;
+    for (let i = 1; i < player.cards.length; i++) {
+      let treasureHidden = document.createElement("DIV");
+      treasureHidden.classList.add("treasureCard", "hiddenTreasureCard");
+      treasureHidden.style.left = leftPos + "px";
+      treasureHidden.style.zIndex = zIndex;
+      treasureToFind.appendChild(treasureHidden);
+      leftPos += 20;
+      zIndex--;
+    }
+  }
+};
+
+const playerOnTreasure = (player, currentTile) => {
+  if (
+    player.currentCardToFind &&
+    player.currentCardToFind.treasure === currentTile.treasure
+  ) {
+    console.log("You founded: " + currentTile.treasure);
+    player.cards.splice(player.cards.indexOf(player.currentCardToFind), 1);
+    player.currentCardToFind = player.cards[0];
+    if (player.currentCardToFind === undefined) {
+      console.log("Come back to home!");
+    } else {
+      renderTreasureToFind(player);
+    }
+    endTurnButton.click();
+  }
+};
+
+const playerOnHome = (player, currentTile) => {
+  if (player.color === currentTile.treasure) {
+    if (player.cards.length === 0) {
+      console.log(player.color + "  won the game!");
+    }
+  }
+};
+
 const renderPlayer = (player) => {
   const tileWherePlayerIs = document.querySelector(
     `.tile[data-position="${player.position}"]`
@@ -284,7 +370,9 @@ const renderPlayer = (player) => {
     `.tile[data-position="${player.previousPosition}"]`
   );
 
-  if (boardArray[player.position].playersOn.length > 1) {
+  const currentTile = boardArray[player.position];
+
+  if (currentTile.playersOn.length > 1) {
     tileWherePlayerIs.classList.add("morePlayers");
   }
 
@@ -293,6 +381,9 @@ const renderPlayer = (player) => {
   }
 
   tileWherePlayerIs.classList.add(`player-${player.color}`);
+
+  playerOnTreasure(player, currentTile);
+  playerOnHome(player, currentTile);
 };
 
 const renderPlayers = () => {
@@ -310,6 +401,7 @@ const renderElementsGame = () => {
   renderBoard();
   renderTileToPlay();
   renderPlayers();
+  renderTreasureToFind(yourPlayer);
 };
 
 const rotateTile = (tile) => {

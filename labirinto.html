@@ -292,6 +292,28 @@
     .topo {
       background-image: url("/img/topo.png");
     }
+    .currentTreasure {
+      position: relative;
+    }
+    .treasureCard {
+      width: 100px;
+      height: 150px;
+      border: 2px solid chocolate;
+      border-radius: 5px;
+      background-repeat: no-repeat;
+      background-size: 100%;
+      background-position: center;
+      background-color: lightyellow;
+    }
+
+    .hiddenTreasureCard {
+      border: 2px solid white;
+      background-color: #1a376f;
+      position: absolute;
+      top: 0;
+      left: 20px;
+      z-index: -1;
+    }
 
     .treasure.blu,
     .treasure.giallo,
@@ -356,6 +378,13 @@
     </div>
     <div class="currentTile"></div>
     <p>Clicca la tessera per ruotarla</p>
+    <div class="playersTreasuresStatus">
+      <ul></ul>
+    </div>
+    <div class="currentTreasureWrapper">
+      <p>Tesoro da trovare</p>
+      <div class="currentTreasure"></div>
+    </div>
     <button class="endTurn">Termina turno</button>
   </div>
 
