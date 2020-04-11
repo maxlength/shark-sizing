@@ -380,7 +380,9 @@ const renderPlayer = (player) => {
     tileWherePlayerWas.classList.remove("morePlayers");
   }
 
-  tileWherePlayerIs.classList.add(`player-${player.color}`);
+  let playerEl = document.createElement("SPAN");
+  playerEl.classList.add(`player-${player.color}`);
+  tileWherePlayerIs.appendChild(playerEl);
 
   playerOnTreasure(player, currentTile);
   playerOnHome(player, currentTile);
@@ -664,10 +666,7 @@ board.addEventListener("click", (e) => {
       currentPlayer.previousPosition = currentPlayer.position;
       currentPlayer.position = tileToPosition;
 
-      let tileWherePlayerWas = document.querySelector(
-        `.player-${currentPlayer.color}`
-      );
-      tileWherePlayerWas.classList.remove(`player-${currentPlayer.color}`);
+      board.getElementsByClassName(`player-${currentPlayer.color}`)[0].remove();
 
       boardArray[currentPlayer.position].playersOn.push(currentPlayer);
 
