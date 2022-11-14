@@ -1,5 +1,6 @@
 name: Publish Website to CPanel
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
